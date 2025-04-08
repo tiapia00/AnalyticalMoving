@@ -3,8 +3,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 # Input set
-# mm, seconds, MPa -> kg
-l = 1000
+# MKS standard units
+l = 25
 c = 30
 
 ni = [2, 2]
@@ -15,7 +15,7 @@ n_points = 100
 Pi = [10, 100]
 E = 210000
 d = 60
-mu = 3
+mu = 18358e-3
 j_end = 40
 
 omega = np.pi*c/l
