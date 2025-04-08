@@ -3,18 +3,19 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 # Input set
-l = 1000    #mm
-c = 30 #mm/s
+# mm, seconds, MPa -> kg
+l = 1000
+c = 30
 
 ni = [2, 2]
 di = [10, 100]
-d12 = 100   #mm
+d12 = 100
 n_points = 100
 
 Pi = [10, 100]
-E = 210000  #MPa
-d = 60  #mm
-mu = 3 #kg/mm
+E = 210000
+d = 60
+mu = 3
 j_end = 40
 
 omega = np.pi*c/l
@@ -92,7 +93,9 @@ t_end = t[0][-1]
 t_trans = np.linspace(t_end, t_end + d12/c, n_points)
 t.insert(1, t_trans)
 t = np.array(t).reshape(-1)
-idxs_exiting = np.array([[0, n_points], [n_points*2, n_points*3-1]]) + idxs_entering[-1][-1] + 1 + n_points
+idxs_exiting = (np.array([[0, n_points],
+    [n_points*2, n_points*3-1]])
+    + idxs_entering[-1][-1] + 1 + n_points)
 idxs_exiting = idxs_exiting.tolist()
 idxs_exiting = tuple(idxs_exiting)
 idxs = [idxs_entering, idxs_exiting]
@@ -118,10 +121,10 @@ for j in range(len(entering)):
         """
         vmid = vi[vi.shape[0]//2, :]
         plt.plot(t_single + t0, vmid, label=f'$P{j}{i}$', color=color)
-        v[:,idxs[0][j][i]:idxs[1][j][i]] += vi
+        v[:, idxs[0][j][i]:idxs[1][j][i]] += vi
 plt.plot(t_tot, v[v.shape[0]//2, :], label='v', color='black')
 plt.legend()
-# Plot entering for P1 
+# Plot entering for P1
 for j in range(len(idxs)):
     color = colors[j]
     for i in range(len(idxs[i])):
@@ -145,7 +148,7 @@ for j in range(len(entering)):
         ti = t_tot[idxs[0][j][i]:idxs[1][j][i]]
         plt.plot(ti, c*(ti-ti[0]), '--', color=color)
 
-plt.colorbar(pcm , label=r'$v(x,t)$')
+plt.colorbar(pcm, label=r'$v(x,t)$')
 plt.xlabel(r'$t$')
 plt.ylabel(r'$x$')
 plt.grid(True)
