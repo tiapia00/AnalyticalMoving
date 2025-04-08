@@ -1,15 +1,15 @@
-from nodamp import return_omega_j, get_v
+from single import return_omega_j, get_v
 import numpy as np
 import matplotlib.pyplot as plt
 
 # Input set
 # MKS standard units
 l = 25
-c = 30
+c = 3
 
 ni = [2, 2]
-di = [10, 100]
-d12 = 100
+di = [1, 1]
+d12 = 2
 n_points = 100
 
 Pi = [10, 100]
