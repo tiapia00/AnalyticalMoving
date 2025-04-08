@@ -23,7 +23,7 @@ v0i = []
 for i in range(len(Pi)):
     v0i.append(2*Pi[i]*l**3/(np.pi**4*E*J))
 alpha = omega/return_omega_j(1, E, J, l, mu)
-print(alpha)
+print(f'alpha={alpha}')
 
 # Settings plot
 colors = ['red', 'blue']
@@ -104,7 +104,6 @@ v = np.zeros((x.shape[0], t_tot.shape[0]))
 # i : indexes
 # idxs[0][0] -> P1 entering
 
-print(idxs)
 plt.figure()
 for j in range(len(entering)):
     color = colors[j]
