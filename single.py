@@ -2,6 +2,8 @@
 
 import numpy as np
 import matplotlib.pyplot as plt
+import scipy.io
+from scipy.interpolate import interp1d
 
 def return_omega_j(j, E, J, l, mu):
     omega_j = j**2*np.pi**2/l**2*(E*J/mu)**(1/2)
@@ -32,7 +34,6 @@ def get_v(x: np.ndarray,
             v_j = 1/(2*j**4)*(np.exp(-omega_d*gridt)*np.sin(
                     j*omega*gridt)-j**2/beta*np.cos(j*omega*gridt)*(1-
                     np.exp(-omega_d*gridt)))*np.sin(j*np.pi*gridx/l)
-            print(np.max(v_j[v_j.shape[0]//2, :]))
         else:
             v_j = np.sin(j*np.pi*gridx/l)*1/(j**2*(j**2-alpha**2))*(
                     np.sin(j*omega*gridt) - alpha/j*np.exp(-omega_d*gridt)*np.sin(omega_j*gridt))
@@ -70,7 +71,6 @@ def get_M(x: np.ndarray,
             M_j = 4*M0/(np.pi**2*j**2)*(np.exp(-omega_d*gridt)*np.sin(
                     j*omega*gridt)-j**2/beta*np.cos(j*omega*gridt)*(1-
                     np.exp(-omega_d*gridt)))*np.sin(j*np.pi*gridx/l)
-            print(np.max(M_j[M_j.shape[0]//2, :]))
         else:
             M_j = np.sin(j*np.pi*gridx/l)*1/(j**2*(1-alpha**2/j**2))*(
                     np.sin(j*omega*gridt) - alpha/j*np.exp(-omega_d*gridt)*np.sin(omega_j*gridt))
@@ -90,14 +90,13 @@ if __name__ == "__main__":
     c = 30
     T = l/c
     P = 1e4
-    E = 1.5e10
-    d = 5
+    E = 3.5e10
+    J = 3.8349
     mu = 18358
     j_end = 20
     damp_ratio = 1e-2
 
     omega = np.pi*c/l
-    J = np.pi/32*d**4
     v0 = 2*P*l**3/(np.pi**4*E*J)
     M0 = P*l/4
     omega0 = return_omega_j(1, E, J, l, mu)
@@ -108,7 +107,7 @@ if __name__ == "__main__":
     x = np.linspace(0, l, 1000)
     t = np.linspace(0, T, 100)
     v, v_contr = get_v(x, t, j_end, alpha, omega, v0, l, E, J, mu, omega_d, True)
-    print(f"alpha = {alpha}")
+    print(f"alpha = {alpha:.2e}")
 
     #Plot midspan displacement in time
     v_mid = v[v.shape[0]//2, :]
@@ -120,6 +119,43 @@ if __name__ == "__main__":
     plt.title('Total deflection')
     plt.show()
 
+    M = get_M(x, t, j_end, alpha, omega, M0, l, E, J, mu, omega_d)
+    M_static = get_M(x, t, j_end, 0, omega, M0, l, E, J, mu, omega_d)
+    M_mid = M[M.shape[0]//2, :]
+    plt.figure()
+    plt.plot(t, M_mid, label='dynamic')
+    plt.plot(t, M_static[M.shape[0]//2, :], label='static')
+    plt.ticklabel_format(axis='y', scilimits=(0,0))
+    plt.xlabel('t')
+    plt.ylabel('M')
+    plt.title('Mid-span bending moment')
+    plt.legend()
+    plt.show()
+
+    # Verification
+    mat_ver = scipy.io.loadmat('Verification\\alow.mat')
+    v_ver = mat_ver['U_xt']
+    M_ver = mat_ver['BM_xt']
+    node_mid = mat_ver['node_midspan'].item()
+    t_ver = mat_ver['t_ver'].squeeze()
+
+    v_ver_mid = v_ver[node_mid, :]
+    M_ver_mid = M_ver[node_mid, :]
+
+    v_ver_interp = interp1d(t_ver, -v_ver_mid, kind='linear')
+    # Fryba uses + for downside displacements
+    v_ver_res = v_ver_interp(t)
+
+    M_ver_interp = interp1d(t_ver, M_ver_mid, kind='linear')
+    M_ver_res = M_ver_interp(t)
+
+    err_v = np.mean((v_ver_res - v_mid)/v0)
+    err_M = np.mean((M_ver_res - M_mid)/M0)
+
+    print(f'err_v = {np.abs(err_v)*100:.2f}%')
+    print(f'err_M = {np.abs(err_M)*100:.2f}%')
+
+    # Plot contribution of each mode
     js = np.arange(v_contr.shape[0])
     plt.figure()
     plt.plot(js, v_contr, 'o')
@@ -137,19 +173,7 @@ if __name__ == "__main__":
     plt.xlim((0,1))
     plt.title("Admensional plot")
     plt.show()
-    print(f"DAF max: {np.max(v_adim)}")
-
-    M = get_M(x, t, j_end, alpha, omega, M0, l, E, J, mu, omega_d)
-    M_static = get_M(x, t, j_end, 0, omega, M0, l, E, J, mu, omega_d)
-    plt.figure()
-    plt.plot(t, M[M.shape[0]//2, :], label='dynamic')
-    plt.plot(t, M_static[M.shape[0]//2, :], label='static')
-    plt.ticklabel_format(axis='y', scilimits=(0,0))
-    plt.xlabel('t')
-    plt.ylabel('M')
-    plt.title('Mid-span bending moment')
-    plt.legend()
-    plt.show()
+    print(f"DAF max: {np.max(v_adim):.2f}")
 
     M_alpha = []
     v_alpha = []
@@ -157,7 +181,7 @@ if __name__ == "__main__":
     alpha_arr = np.arange(0, 2, 0.1)
     for alpha in alpha_arr:
         M = get_M(x, t, j_end, alpha, omega, M0, l, E, J, mu, omega_d)/M0
-        v = get_v(x, t, j_end, alpha, omega, v0, l, E, J, mu, omega_d)
+        v = get_v(x, t, j_end, alpha, omega, v0, l, E, J, mu, omega_d)/v0
 
         M_max = np.max(np.abs(M[M.shape[0]//2, :]))
         v_max = np.max(np.abs(v[v.shape[0]//2, :]))
@@ -180,4 +204,3 @@ if __name__ == "__main__":
     plt.xlabel(r'$\alpha$')
     plt.ylabel(r'$v_{max}/v_0$')
     plt.show()
-
