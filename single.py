@@ -23,12 +23,20 @@ def get_v(x: np.ndarray,
     # x, t: 1D arrays
     gridx, gridt = np.meshgrid(x, t)
     v = np.zeros_like(gridx)
+    beta = omega_d / return_omega_j(1, E, J, l, mu)
 
     v_contr = []
     for j in range(1, j_end):
         omega_j = return_omega_j(j, E, J, l, mu)
-        v_j = np.sin(j*np.pi*gridx/l)*1/(j**2*(j**2-alpha**2))*(
-                np.sin(j*omega*gridt) - alpha/j*np.exp(-omega_d*gridt)*np.sin(omega_j*gridt))
+        if alpha == j:
+            v_j = 1/(2*j**4)*(np.exp(-omega_d*gridt)*np.sin(
+                    j*omega*gridt)-j**2/beta*np.cos(j*omega*gridt)*(1-
+                    np.exp(-omega_d*gridt)))*np.sin(j*np.pi*gridx/l)
+            print(np.max(v_j[v_j.shape[0]//2, :]))
+        else:
+            v_j = np.sin(j*np.pi*gridx/l)*1/(j**2*(j**2-alpha**2))*(
+                    np.sin(j*omega*gridt) - alpha/j*np.exp(-omega_d*gridt)*np.sin(omega_j*gridt))
+
         v += v_j
         v_contr.append(np.mean(v_j.T[v_j.shape[0]//2, :]))
 
@@ -54,14 +62,22 @@ def get_M(x: np.ndarray,
 
     gridx, gridt = np.meshgrid(x, t)
     M = np.zeros_like(gridx)
+    beta = omega_d / return_omega_j(1, E, J, l, mu)
 
     for j in range(1, j_end):
         omega_j = return_omega_j(j, E, J, l, mu)
-        M_j = np.sin(j*np.pi*gridx/l)*1/(j**2*(1-alpha**2/j**2))*(
-                np.sin(j*omega*gridt) - alpha/j*np.exp(-omega_d*gridt)*np.sin(omega_j*gridt))
+        if alpha == j:
+            M_j = 4*M0/(np.pi**2*j**2)*(np.exp(-omega_d*gridt)*np.sin(
+                    j*omega*gridt)-j**2/beta*np.cos(j*omega*gridt)*(1-
+                    np.exp(-omega_d*gridt)))*np.sin(j*np.pi*gridx/l)
+            print(np.max(M_j[M_j.shape[0]//2, :]))
+        else:
+            M_j = np.sin(j*np.pi*gridx/l)*1/(j**2*(1-alpha**2/j**2))*(
+                    np.sin(j*omega*gridt) - alpha/j*np.exp(-omega_d*gridt)*np.sin(omega_j*gridt))
+            M_j *= 8/(np.pi)**2*M0
+
         M += M_j
 
-    M *= 8/(np.pi)**2*M0
     return M.T
 
 #simply supported beam
@@ -71,11 +87,11 @@ def get_M(x: np.ndarray,
 if __name__ == "__main__":
     # MKS units
     l = 25
-    c = 20
+    c = 30
     T = l/c
     P = 1e4
     E = 1.5e10
-    d = 2.5
+    d = 5
     mu = 18358
     j_end = 20
     damp_ratio = 1e-2
@@ -136,18 +152,32 @@ if __name__ == "__main__":
     plt.show()
 
     M_alpha = []
-    alpha_arr = np.arange(0, 2, 0.01)
+    v_alpha = []
+
+    alpha_arr = np.arange(0, 2, 0.1)
     for alpha in alpha_arr:
         M = get_M(x, t, j_end, alpha, omega, M0, l, E, J, mu, omega_d)/M0
+        v = get_v(x, t, j_end, alpha, omega, v0, l, E, J, mu, omega_d)
+
         M_max = np.max(np.abs(M[M.shape[0]//2, :]))
+        v_max = np.max(np.abs(v[v.shape[0]//2, :]))
         M_alpha.append(M_max)
+        v_alpha.append(v_max)
 
     M_alpha = np.array(M_alpha)
+    v_alpha = np.array(v_alpha)
 
     plt.figure()
     plt.plot(alpha_arr, M_alpha)
     plt.ticklabel_format(axis='y', scilimits=(0,0))
     plt.xlabel(r'$\alpha$')
     plt.ylabel(r'$M_{max}/M_0$')
+    plt.show()
+
+    plt.figure()
+    plt.plot(alpha_arr, v_alpha)
+    plt.ticklabel_format(axis='y', scilimits=(0,0))
+    plt.xlabel(r'$\alpha$')
+    plt.ylabel(r'$v_{max}/v_0$')
     plt.show()
 
