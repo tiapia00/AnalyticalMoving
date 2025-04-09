@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 # Input set
 # MKS standard units
 l = 25
-c = 3
+c = 300
 
 ni = [2, 2]
 di = [1, 1]
@@ -13,13 +13,12 @@ d12 = 2
 n_points = 100
 
 Pi = [10, 100]
-E = 210000
-d = 60
-mu = 18358e-3
-j_end = 40
+E = 3.5e10
+J = 3.8349
+mu = 18358
+j_end = 10
 
 omega = np.pi*c/l
-J = np.pi/32*d**4
 v0i = []
 for i in range(len(Pi)):
     v0i.append(2*Pi[i]*l**3/(np.pi**4*E*J))
