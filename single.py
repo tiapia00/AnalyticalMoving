@@ -62,7 +62,7 @@ def get_M(x: np.ndarray,
           E: float,
           J: float,
           mu: float,
-          omega_d: float):
+          omega_d: float = 0):
 
     gridx, gridt = np.meshgrid(x, t, indexing='ij')
 
