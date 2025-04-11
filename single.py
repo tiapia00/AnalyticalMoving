@@ -1,6 +1,5 @@
 # Given the coordinate and beam parameters, plot the response and the DAF
 
-import subprocess
 import numpy as np
 import matplotlib.pyplot as plt
 import scipy.io
@@ -32,16 +31,22 @@ def get_v(x: np.ndarray,
     v_contr = []
     for j in range(1, j_end):
         omega_j = return_omega_j(j, E, J, l, mu)
-        if alpha == j:
-            v_j_x = np.sin(j*np.pi*gridx/l)
-            v_j_t = np.exp(-omega_d*gridt)*np.sin(
-                    j*omega*gridt)-j**2/beta*np.cos(j*omega*gridt)*(1-
-                    np.exp(-omega_d*gridt))
-            v_j = v_j_x * v_j_t * (2*j**4)**(-1)
+        v_j = np.sin(j * np.pi * gridx/l)
+        if j == alpha:
+            if beta != 0:
+                v_j *= (np.exp(-omega_d*gridt)*np.sin(
+                        j*omega*gridt)- j**2/beta * np.cos(j*omega*gridt) * (1-
+                        np.exp(-omega_d*gridt)))
+            else:
+                v_j *= (np.sin(j * omega * gridt) - j * omega * gridt * np.cos(j * omega * gridt))
+            v_j *= 1/(2*j**4)
+            plt.figure()
+            plt.plot(t, v_j[v_j.shape[0]//2, :])
+            plt.title('alpha = 1')
+            plt.show()
         else:
-            v_j_x = np.sin(j*np.pi*gridx/l)
-            v_j_t = np.sin(omega * j * gridt) - alpha/j * np.sin(omega_j * gridt)
-            v_j = v_j_x * v_j_t * (j**2*(j**2-alpha**2))**(-1)
+            v_j *= (np.sin(omega * j * gridt) - alpha/j * np.sin(omega_j * gridt))
+            v_j *= (j**2*(j**2-alpha**2))**(-1)
 
         v += v_j
         v_contr.append(np.mean(v_j[v_j.shape[0]//2, :]))
@@ -78,12 +83,14 @@ def get_M(x: np.ndarray,
                     j*omega*gridt)-j**2/beta*np.cos(j*omega*gridt)*(1-
                     np.exp(-omega_d*gridt)))*np.sin(j*np.pi*gridx/l)
         else:
-            M_j_x = np.sin(j*np.pi*gridx/l)
-            M_j_t = np.sin(omega * j * gridt) - alpha/j * np.sin(omega_j * gridt)
-            M_j = M_j_x * M_j_t * (j**2*(j**2-alpha**2))**(-1)
-            M_j *= 8/(np.pi)**2*M0
+            M_j = np.sin(j * np.pi * gridx/l)
+            M_j *= (np.sin(omega * j * gridt) - alpha/j * np.sin(omega_j * gridt))
+            M_j *= 1/(j**2*(1-alpha**2/j**2))
 
         M += M_j
+
+    M *= M0
+    M *= 8/(np.pi**2)
 
     return M
 
@@ -102,10 +109,10 @@ if __name__ == "__main__":
     j_end = 20
     damp_ratio = 0
 
-    nx = 501
+    nx = 1001
     nt = 101
 
-    omega = np.pi*c/l
+    omega = np.pi * c/l
     v0 = 2*P*l**3/(np.pi**4*E*J)
     M0 = P*l/4
     omega1 = return_omega_j(1, E, J, l, mu)
@@ -145,25 +152,16 @@ if __name__ == "__main__":
     """
 
     M = get_M(x, t, j_end, alpha, omega, M0, l, E, J, mu, omega_d)
-    M_static = get_M(x, t, j_end, 0, omega, M0, l, E, J, mu, omega_d)
     M_mid = M[M.shape[0]//2, :]
+    M_static = get_M(x, t, j_end, 0, omega, M0, l, E, J, mu, omega_d)
     plt.figure()
     plt.plot(t, M_mid, label='dynamic')
-    plt.plot(t, M_static[M.shape[0]//2, :], label='static')
     plt.ticklabel_format(axis='y', scilimits=(0,0))
+    plt.plot(t, M_static[M_static.shape[0]//2,:], label='static')
     plt.xlabel('t')
     plt.ylabel('M')
     plt.title('Mid-span bending moment')
     plt.legend()
-    plt.show()
-
-    # Verify if moment shape for t=cT/2 is triangular
-    M_atmidspan_static = M_static[:, M_static.shape[1]//2]
-    plt.figure()
-    plt.plot(x, M_atmidspan_static)
-    plt.xlabel(r'$x$')
-    plt.ylabel(r'$M(x)$')
-    plt.title('Static moment for M at midspan')
     plt.show()
 
     # Verification
@@ -216,8 +214,8 @@ if __name__ == "__main__":
 
     alpha_arr = np.arange(0, 2, 0.1)
     for alpha in alpha_arr:
-        M = get_M(x, t, j_end, alpha, omega, M0, l, E, J, mu, omega_d)/M0
         v = get_v(x, t, j_end, alpha, omega, v0, l, E, J, mu, omega_d)/v0
+        M = get_M(x, t, j_end, alpha, omega, M0, l, E, J, mu, omega_d)/M0
 
         M_max = np.max(np.abs(M[M.shape[0]//2, :]))
         v_max = np.max(np.abs(v[v.shape[0]//2, :]))
@@ -228,15 +226,15 @@ if __name__ == "__main__":
     v_alpha = np.array(v_alpha)
 
     plt.figure()
-    plt.plot(alpha_arr, M_alpha)
-    plt.ticklabel_format(axis='y', scilimits=(0,0))
-    plt.xlabel(r'$\alpha$')
-    plt.ylabel(r'$M_{max}/M_0$')
-    plt.show()
-
-    plt.figure()
     plt.plot(alpha_arr, v_alpha)
     plt.ticklabel_format(axis='y', scilimits=(0,0))
     plt.xlabel(r'$\alpha$')
     plt.ylabel(r'$v_{max}/v_0$')
+    plt.show()
+
+    plt.figure()
+    plt.plot(alpha_arr, M_alpha)
+    plt.ticklabel_format(axis='y', scilimits=(0,0))
+    plt.xlabel(r'$\alpha$')
+    plt.ylabel(r'$M_{max}/M_0$')
     plt.show()
