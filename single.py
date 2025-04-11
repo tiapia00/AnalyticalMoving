@@ -33,9 +33,11 @@ def get_v(x: np.ndarray,
     for j in range(1, j_end):
         omega_j = return_omega_j(j, E, J, l, mu)
         if alpha == j:
-            v_j = 1/(2*j**4)*(np.exp(-omega_d*gridt)*np.sin(
+            v_j_x = np.sin(j*np.pi*gridx/l)
+            v_j_t = np.exp(-omega_d*gridt)*np.sin(
                     j*omega*gridt)-j**2/beta*np.cos(j*omega*gridt)*(1-
-                    np.exp(-omega_d*gridt)))*np.sin(j*np.pi*gridx/l)
+                    np.exp(-omega_d*gridt))
+            v_j = v_j_x * v_j_t * (2*j**4)**(-1)
         else:
             v_j_x = np.sin(j*np.pi*gridx/l)
             v_j_t = np.sin(omega * j * gridt) - alpha/j * np.sin(omega_j * gridt)
@@ -97,8 +99,11 @@ if __name__ == "__main__":
     E = 3.5e10
     J = 3.8349
     mu = 18358
-    j_end = 10
+    j_end = 20
     damp_ratio = 0
+
+    nx = 501
+    nt = 101
 
     omega = np.pi*c/l
     v0 = 2*P*l**3/(np.pi**4*E*J)
@@ -108,9 +113,13 @@ if __name__ == "__main__":
 
     omega_d = omega1*(1-damp_ratio**2)**(1/2)
 
-    x = np.linspace(0, l, 501)
-    t = np.linspace(0, T, 100)
+    x = np.linspace(0, l, nx)
+    t = np.linspace(0, T, nt)
+    dx = l/(nx-1)
+    dt = T/(nt-1)
+
     v, v_contr = get_v(x, t, j_end, alpha, omega, v0, l, E, J, mu, omega_d, True)
+    v_static = get_v(x, t, j_end, 0, omega, v0, l, E, J, mu, omega_d, False)
     print(f"alpha = {alpha:.2e}")
 
     #Plot midspan displacement in time
@@ -123,6 +132,18 @@ if __name__ == "__main__":
     plt.title('Total deflection')
     plt.show()
 
+    """ Verification for maximum static deflection
+    not necessairly at midspan
+
+    t_look = T/3
+    idx_force = int(t_look//dt)
+    v_static_pos = v_static[:, idx_force]
+    v_max_static = np.max(v_static_pos)
+    delta_an = (P * c*t_look)/(48 * E * J) * (3 * l**2 - 4 * (c*t_look)**2)
+    err = v_max_static - delta_an
+    print(err)
+    """
+
     M = get_M(x, t, j_end, alpha, omega, M0, l, E, J, mu, omega_d)
     M_static = get_M(x, t, j_end, 0, omega, M0, l, E, J, mu, omega_d)
     M_mid = M[M.shape[0]//2, :]
@@ -134,6 +155,15 @@ if __name__ == "__main__":
     plt.ylabel('M')
     plt.title('Mid-span bending moment')
     plt.legend()
+    plt.show()
+
+    # Verify if moment shape for t=cT/2 is triangular
+    M_atmidspan_static = M_static[:, M_static.shape[1]//2]
+    plt.figure()
+    plt.plot(x, M_atmidspan_static)
+    plt.xlabel(r'$x$')
+    plt.ylabel(r'$M(x)$')
+    plt.title('Static moment for M at midspan')
     plt.show()
 
     # Verification
