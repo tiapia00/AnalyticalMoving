@@ -214,6 +214,8 @@ if __name__ == "__main__":
 
     alpha_arr = np.arange(0, 2, 0.1)
     for alpha in alpha_arr:
+        omega *= alpha
+        # keep consistent alpha and omega
         v = get_v(x, t, j_end, alpha, omega, v0, l, E, J, mu, omega_d)/v0
         M = get_M(x, t, j_end, alpha, omega, M0, l, E, J, mu, omega_d)/M0
 
