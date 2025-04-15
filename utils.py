@@ -158,8 +158,9 @@ def build_time_array(my_beam: Beam, Pi, di, ni, dij, nt, c):
 
     return t_tot, idxs
 
-def build_multi_disp(my_beam: Beam, t_tot, idxs, Pi):
+def get_multi_v_bm(my_beam: Beam, t_tot, idxs, Pi):
     v = np.zeros((my_beam.x.shape[0], t_tot.shape[0]))
+    bm = np.zeros((my_beam.x.shape[0], t_tot.shape[0]))
     v0_init = my_beam.v0
     tis = []
     vis = []
@@ -172,11 +173,16 @@ def build_multi_disp(my_beam: Beam, t_tot, idxs, Pi):
             t_single = t_tot[idxs[0][j][i]:idxs[1][j][i]] - t0
             my_beam.t = t_single
             vi = my_beam.get_v(my_beam.alpha)
+            bmi = my_beam.get_bm(my_beam.alpha)
             v0i = vi[:, -1].reshape(-1,1)
             v0i_dot = my_beam.get_v_dot(my_beam.alpha)[:,-1].reshape(-1,1)
-            vi_free = my_beam.get_free_response(v0i, v0i_dot, t_tot[idxs[1][j][i]:] - t_tot[idxs[1][j][i]])
+
+            vi_free, bm_free = my_beam.get_free_response(v0i, v0i_dot, t_tot[idxs[1][j][i]:] - t_tot[idxs[1][j][i]])
             v[:, idxs[0][j][i]:idxs[1][j][i]] += vi
             v[:, idxs[1][j][i]:] += vi_free
+
+            bm[:, idxs[0][j][i]:idxs[1][j][i]] += bmi
+            bm[:, idxs[1][j][i]:] += bm_free
 
             tji = np.concatenate((t_single + t0, t_tot[idxs[1][j][i]:]))
             tj.append(tji)
@@ -192,4 +198,4 @@ def build_multi_disp(my_beam: Beam, t_tot, idxs, Pi):
         tis.append(tj)
         vis.append(vj)
 
-    return v, tis, vis
+    return v, bm, tis, vis

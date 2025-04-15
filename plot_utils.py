@@ -71,8 +71,6 @@ def plot_multi_disp_mid(t_tot, v, tis, vis, colors):
     plt.show()
 
 def plot_heatmap_disp(x, t_tot, c, v, idxs, colors, dx):
-    plt.figure()
-
     X, T = np.meshgrid(x, t_tot, indexing='ij')
     # Contour plot x-t
     plt.figure()
@@ -96,4 +94,27 @@ def plot_heatmap_disp(x, t_tot, c, v, idxs, colors, dx):
     plt.ylabel(r'$x$')
     plt.grid(True)
     plt.title('2D v map')
+    plt.show()
+
+def plot_heatmap_bm(x, t_tot, c, bm, idxs, colors, dx):
+    X, T = np.meshgrid(x, t_tot, indexing='ij')
+    # Contour plot x-t
+    plt.figure()
+
+    pcm = plt.pcolormesh(T, X, bm, shading='auto', cmap='viridis')
+
+    # plot forces lines
+    for j in range(len(idxs)):
+        color = colors[j]
+        for i in range(len(idxs[0])):
+            ti = t_tot[idxs[0][j][i]:idxs[1][j][i]]
+            plt.plot(ti, c*(ti-ti[0]), '--', color=color)
+
+    # add COP BM
+
+    plt.colorbar(pcm, label=r'$BM(x,t)$')
+    plt.xlabel(r'$t$')
+    plt.ylabel(r'$x$')
+    plt.grid(True)
+    plt.title('2D BM map')
     plt.show()

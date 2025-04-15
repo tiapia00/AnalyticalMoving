@@ -139,11 +139,19 @@ class Beam:
             b[j - 1] *= 1 / self.return_omega_j(j)
 
         gridx, gridt = np.meshgrid(self.x, t_free, indexing='ij')
+
         v = np.zeros((len(self.x), len(t_free)))
+        bm = np.zeros((len(self.x), len(t_free)))
 
         for j in range(0, a.shape[0]):
             omega_j = self.return_omega_j(j + 1)
             vj = a[j] * np.cos(omega_j * gridt) + b[j] * np.sin(omega_j * gridt)
             vj *= np.sin((j + 1) * np.pi * gridx / self.l)
             v += vj
-        return v
+
+            bmj = a[j] * np.sin(omega_j * gridt) - b[j] * np.cos(omega_j * gridt)
+            bmj *= np.sin((j + 1) * np.pi * gridx / self.l)
+            bmj *= (j+1)**2 * np.pi**2 / self.l**2
+            bmj *= self.E*self.J
+            bm += bmj
+        return v, bm
