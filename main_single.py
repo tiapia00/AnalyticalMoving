@@ -34,7 +34,7 @@ plot_mode_contr(contr_bm, 'BM')
 t_free = np.linspace(0, t_free, nt)
 v0 = v[:,-1].reshape(-1,1)
 v0_dot = my_beam.get_v_dot(my_beam.alpha)
-v_free = my_beam.get_free_response(v0, v0_dot[:,-1].reshape(-1,1), t_free)
+v_free, bm_free = my_beam.get_free_response(v0, v0_dot[:,-1].reshape(-1,1), t_free)
 plot_disp_mid_tot(my_beam, v, v_free, t_free)
 
 alphas = np.linspace(0, 1, 100)
