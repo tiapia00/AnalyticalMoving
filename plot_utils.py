@@ -41,15 +41,59 @@ def plot_mode_contr(mode_contr, ident: str):
     plt.title('Mode contribution ' + ident)
     plt.show()
 
-def plot_sweep_alpha(vs_mid, bms_mid, alphas):
+def plot_sweep_alpha(vs_mid, bms_mid, vs_max, bms_max, alphas):
     plt.figure()
-    plt.plot(alphas, vs_mid)
+    plt.plot(alphas, vs_mid, label='DAF')
+    plt.plot(alphas, vs_max, label='FDAF')
+    plt.legend()
     plt.xlabel(r'$\alpha$')
     plt.ylabel(r'$DAF_v$')
     plt.show()
 
     plt.figure()
-    plt.plot(alphas, bms_mid)
+    plt.plot(alphas, bms_mid, label='DAF')
+    plt.plot(alphas, bms_max, label='FDAF')
+    plt.legend()
     plt.xlabel(r'$\alpha$')
     plt.ylabel(r'$DAF_{BM}$')
+    plt.show()
+
+def plot_multi_disp_mid(t_tot, v, tis, vis, colors):
+    plt.plot(t_tot, v[v.shape[0] // 2, :], label='v', color='black')
+    for j in range(len(tis)):
+        for i in range(len(tis[j])):
+            plt.plot(tis[i][j], vis[i][j][vis[i][j].shape[0] // 2, :], '--', color=colors[i])
+        # color is related to the magnitude, so associated with the first index
+    plt.xlabel(r'$t$')
+    plt.legend()
+    plt.ylabel(r'$v_{mid}$')
+    plt.title('Displacement at midspan')
+    plt.show()
+
+def plot_heatmap_disp(x, t_tot, c, v, idxs, colors, dx):
+    plt.figure()
+
+    X, T = np.meshgrid(x, t_tot, indexing='ij')
+    # Contour plot x-t
+    plt.figure()
+
+    pcm = plt.pcolormesh(T, X, v, shading='auto', cmap='viridis')
+
+    # plot forces lines
+    for j in range(len(idxs)):
+        color = colors[j]
+        for i in range(len(idxs[0])):
+            ti = t_tot[idxs[0][j][i]:idxs[1][j][i]]
+            plt.plot(ti, c*(ti-ti[0]), '--', color=color)
+
+    loct = np.argmax(v, axis=1)
+    locx = np.argmax(loct)
+    COP = locx * dx
+    plt.plot(t_tot, np.ones_like(t_tot)*COP, '--w', label='COP')
+
+    plt.colorbar(pcm, label=r'$v(x,t)$')
+    plt.xlabel(r'$t$')
+    plt.ylabel(r'$x$')
+    plt.grid(True)
+    plt.title('2D v map')
     plt.show()
