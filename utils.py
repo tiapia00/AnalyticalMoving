@@ -3,6 +3,7 @@ import numpy as np
 import scipy.io
 import matplotlib.pyplot as plt
 from scipy.interpolate import interp1d
+import matlab.engine
 
 def sweep_alpha_mid(my_beam: Beam, alphas: np.ndarray):
     vs_mid = []
@@ -199,3 +200,27 @@ def get_multi_v_bm(my_beam: Beam, t_tot, idxs, Pi):
         vis.append(vj)
 
     return v, bm, tis, vis
+
+def sweep_alpha_matlab(alphas: np.ndarray, script_path: str, data_mat: dict, v0, bm0):
+    eng = matlab.engine.start_matlab()
+    eng.cd(script_path, nargout=0)
+    vsmax = []
+    bmsmax = []
+
+    for alpha in alphas:
+        c0 = data_mat['c']
+        if alpha != 0:
+            data_mat['c'] = c0 * alpha
+        scipy.io.savemat('data.mat', data_mat)
+        eng.main(nargout=0)
+        v = np.array(eng.workspace['U_xt'])
+        v = v[v.shape[0]//2, :]
+        vsmax.append(np.max(v)/v0)
+
+        bm = np.array(eng.workspace['BM_xt'])
+        bm = bm[bm.shape[0]//2, :]
+        bmsmax.append(np.max(bm)/bm0)
+
+    return vsmax, bmsmax
+
+

@@ -58,6 +58,23 @@ def plot_sweep_alpha(vs_mid, bms_mid, vs_max, bms_max, alphas):
     plt.ylabel(r'$DAF_{BM}$')
     plt.show()
 
+def plot_sweep_alpha_ver(vs_mid, bms_mid, vs_ver, bms_ver, alphas):
+    plt.figure()
+    plt.plot(alphas, vs_mid, label='DAF_Python')
+    plt.plot(alphas, vs_ver, label='DAF_Matlab')
+    plt.legend()
+    plt.xlabel(r'$\alpha$')
+    plt.ylabel(r'$DAF_v$')
+    plt.show()
+
+    plt.figure()
+    plt.plot(alphas, bms_mid, label='DAF_Python')
+    plt.plot(alphas, bms_ver, label='DAF_Matlab')
+    plt.legend()
+    plt.xlabel(r'$\alpha$')
+    plt.ylabel(r'$DAF_{BM}$')
+    plt.show()
+
 def plot_multi_disp_mid(t_tot, v, tis, vis, colors):
     plt.plot(t_tot, v[v.shape[0] // 2, :], label='v', color='black')
     for j in range(len(tis)):
