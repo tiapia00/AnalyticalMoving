@@ -2,11 +2,6 @@ from utils import build_time_array, get_multi_v_bm
 from plot_utils import plot_multi_disp_mid, plot_heatmap_disp, plot_heatmap_bm
 from beam import Beam
 import numpy as np
-import matplotlib.pyplot as plt
-# plt.rcParams.update({
-#     "text.usetex": True,
-#     "font.family": "Helvetica"
-# })
 
 ni = np.array([2, 2])
 di = np.array([1.5, 1.5])
