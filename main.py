@@ -19,7 +19,7 @@ n_modes = 10
 damp_ratio = 0
 t_free = 0.5
 
-regenerate_ver = True
+generate_verify = True
 data_mat = {
     'l': float(l),
     'c': float(c),
@@ -30,7 +30,7 @@ data_mat = {
     'damp_ratio': float(damp_ratio)
 }
 
-if regenerate_ver:
+if generate_verify:
     savemat('data.mat', data_mat)
 
 nx = 101
@@ -62,11 +62,11 @@ v_mid = v[v.shape[0]//2, :]
 bm_mid = bm[bm.shape[0]//2, :]
 
 script_path = r'C:\Users\mattiaan\Documents\MATLAB\VBI-2D'
-if regenerate_ver:
+if generate_verify:
     eng = matlab.engine.start_matlab()
     eng.cd(script_path, nargout=0)
     eng.addpath(eng.genpath(script_path))
-    eng.main(nargout=0)
+    eng.main_single(nargout=0)
     eng.quit()
 
 verify_results(v_mid, bm_mid, my_beam.v0, my_beam.M0, my_beam.t)
