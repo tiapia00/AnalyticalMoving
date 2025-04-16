@@ -47,7 +47,7 @@ def sweep_alpha_max(my_beam: Beam, alphas: np.ndarray):
 
     return vs_mid, bms_mid
 
-def verify_results(v_mid, bm_mid, t):
+def verify_results(v_mid, bm_mid, v0_sum, bm0_sum, t):
     mat_ver = scipy.io.loadmat('Verification_multi.mat')
     v_ver = mat_ver['U_xt']
     bm_ver = mat_ver['BM_xt']
@@ -66,23 +66,23 @@ def verify_results(v_mid, bm_mid, t):
     bm_ver_interp = interp1d(t_ver, bm_ver_mid, kind=interp_order)
     bm_ver_res = bm_ver_interp(t)
 
-    err_v = np.mean((v_ver_res - v_mid))
-    err_M = np.mean((bm_ver_res - bm_mid))
+    err_v = np.mean((v_ver_res - v_mid)/v0_sum)
+    err_M = np.mean((bm_ver_res - bm_mid)/bm0_sum)
 
     plt.figure()
-    plt.plot(t, v_mid, label='calculated')
-    plt.plot(t, v_ver_res, label='verification')
+    plt.plot(t, v_mid/v0_sum, label='calculated')
+    plt.plot(t, v_ver_res/v0_sum, label='verification')
     plt.xlabel('t')
-    plt.ylabel('v')
+    plt.ylabel('v/v0ii')
     plt.title('Verification mid-span displacement')
     plt.legend()
     plt.show()
 
     plt.figure()
-    plt.plot(t, bm_mid, label='calculated')
-    plt.plot(t, bm_ver_res, label='verification')
+    plt.plot(t, bm_mid/bm0_sum, label='calculated')
+    plt.plot(t, bm_ver_res/bm0_sum, label='verification')
     plt.xlabel('t')
-    plt.ylabel('M')
+    plt.ylabel('bm/bm0ii')
     plt.title('Verification mid-span BM')
     plt.legend()
     plt.show()
@@ -166,8 +166,8 @@ def get_multi_v_bm(my_beam: Beam, t_tot, idxs, Pi):
     tis = []
     vis = []
     for j in range(len(idxs[0])):
-        my_beam.v0 = v0_init * Pi[j]
-        my_beam.M0 = M0_init * Pi[j]
+        my_beam.v0 = v0_init * Pi[j]/Pi[0]
+        my_beam.M0 = M0_init * Pi[j]/Pi[0]
         tj = []
         vj = []
         for i in range(len(idxs[0][0])):
@@ -185,7 +185,7 @@ def get_multi_v_bm(my_beam: Beam, t_tot, idxs, Pi):
             vi_free, bm_free = my_beam.get_free_response(v0i, v0i_dot, t_tot[idxs[1][j][i]:] - t_tot[idxs[1][j][i]])
 
             v[:, idxs[1][j][i]:] += vi_free
-            bm[:, idxs[1][j][i]:] += bm_free
+            #bm[:, idxs[1][j][i]:] += bm_free
 
             tji = np.concatenate((t_single + t0, t_tot[idxs[1][j][i]:]))
             tj.append(tji)

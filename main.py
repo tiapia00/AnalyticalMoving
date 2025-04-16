@@ -21,6 +21,7 @@ nx = 101
 nt = 101
 damp_ratio = 0
 colors = ['red', 'blue']
+generate_verify = True
 
 data_mat = {
     'l': float(l),
@@ -59,11 +60,12 @@ plot_multi_disp_mid(t_tot, v, tis, vis, colors)
 plot_heatmap_disp(my_beam.x, t_tot, c, v, idxs, colors, dx)
 plot_heatmap_bm(my_beam.x, t_tot, c, bm, idxs, colors, dx)
 
-script_path = r'C:\Users\mattiaan\Documents\MATLAB\VBI-2D'
-eng = matlab.engine.start_matlab()
-eng.cd(script_path, nargout=0)
-eng.addpath(eng.genpath(script_path))
-eng.main_multi(nargout=0)
-eng.quit()
+if generate_verify:
+    script_path = r'C:\Users\mattiaan\Documents\MATLAB\VBI-2D'
+    eng = matlab.engine.start_matlab()
+    eng.cd(script_path, nargout=0)
+    eng.addpath(eng.genpath(script_path))
+    eng.main_multi(nargout=0)
+    eng.quit()
 
-verify_results(v[v.shape[0]//2, :], bm[bm.shape[0]//2, :], t_tot)
+verify_results(v[v.shape[0]//2, :], bm[bm.shape[0]//2, :], np.sum(v0i), np.sum(M0i), t_tot)
