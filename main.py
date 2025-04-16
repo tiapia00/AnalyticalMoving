@@ -1,7 +1,9 @@
-from utils import build_time_array, get_multi_v_bm
+from utils import build_time_array, get_multi_v_bm, verify_results
 from plot_utils import plot_multi_disp_mid, plot_heatmap_disp, plot_heatmap_bm
 from beam import Beam
 import numpy as np
+from scipy.io import savemat
+import matlab.engine
 
 ni = np.array([2, 2])
 di = np.array([1.5, 1.5])
@@ -19,6 +21,21 @@ nx = 101
 nt = 101
 damp_ratio = 0
 colors = ['red', 'blue']
+
+data_mat = {
+    'l': float(l),
+    'c': float(c),
+    'P1': float(Pi[0]),
+    'P2': float(Pi[1]),
+    'd1': float(di[0]),
+    'd2': float(di[1]),
+    'd12': float(dij[0]),
+    'E': float(E),
+    'J': float(J),
+    'mu': float(mu),
+    'damp_ratio': float(damp_ratio)
+}
+savemat('data_multi.mat', data_mat)
 
 my_beam = Beam(l, mu, E, J, damp_ratio, n_modes, nx, nt, Pi[0], c)
 dx = my_beam.x[1] - my_beam.x[0]
@@ -41,3 +58,12 @@ v, bm, tis, vis = get_multi_v_bm(my_beam, t_tot, idxs, Pi)
 plot_multi_disp_mid(t_tot, v, tis, vis, colors)
 plot_heatmap_disp(my_beam.x, t_tot, c, v, idxs, colors, dx)
 plot_heatmap_bm(my_beam.x, t_tot, c, bm, idxs, colors, dx)
+
+script_path = r'C:\Users\mattiaan\Documents\MATLAB\VBI-2D'
+eng = matlab.engine.start_matlab()
+eng.cd(script_path, nargout=0)
+eng.addpath(eng.genpath(script_path))
+eng.main_multi(nargout=0)
+eng.quit()
+
+verify_results(v[v.shape[0]//2, :], bm[bm.shape[0]//2, :], t_tot)

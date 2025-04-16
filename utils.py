@@ -47,8 +47,8 @@ def sweep_alpha_max(my_beam: Beam, alphas: np.ndarray):
 
     return vs_mid, bms_mid
 
-def verify_results(v_mid, bm_mid, v0, M0, t):
-    mat_ver = scipy.io.loadmat('Verification.mat')
+def verify_results(v_mid, bm_mid, t):
+    mat_ver = scipy.io.loadmat('Verification_multi.mat')
     v_ver = mat_ver['U_xt']
     bm_ver = mat_ver['BM_xt']
     node_mid = mat_ver['node_midspan'].item()
@@ -66,23 +66,23 @@ def verify_results(v_mid, bm_mid, v0, M0, t):
     bm_ver_interp = interp1d(t_ver, bm_ver_mid, kind=interp_order)
     bm_ver_res = bm_ver_interp(t)
 
-    err_v = np.mean((v_ver_res - v_mid)/v0)
-    err_M = np.mean((bm_ver_res - bm_mid)/M0)
+    err_v = np.mean((v_ver_res - v_mid))
+    err_M = np.mean((bm_ver_res - bm_mid))
 
     plt.figure()
-    plt.plot(t, v_mid/v0, label='calculated')
-    plt.plot(t, v_ver_res/v0, label='verification')
+    plt.plot(t, v_mid, label='calculated')
+    plt.plot(t, v_ver_res, label='verification')
     plt.xlabel('t')
-    plt.ylabel('v/v0')
+    plt.ylabel('v')
     plt.title('Verification mid-span displacement')
     plt.legend()
     plt.show()
 
     plt.figure()
-    plt.plot(t, bm_mid/M0, label='calculated')
-    plt.plot(t, bm_ver_res/M0, label='verification')
+    plt.plot(t, bm_mid, label='calculated')
+    plt.plot(t, bm_ver_res, label='verification')
     plt.xlabel('t')
-    plt.ylabel('M/M0')
+    plt.ylabel('M')
     plt.title('Verification mid-span BM')
     plt.legend()
     plt.show()
