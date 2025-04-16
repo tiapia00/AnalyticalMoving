@@ -84,8 +84,8 @@ def plot_heatmap_disp(x, t_tot, c, v, idxs, colors, dx):
             ti = t_tot[idxs[0][j][i]:idxs[1][j][i]]
             plt.plot(ti, c*(ti-ti[0]), '--', color=color)
 
-    loct = np.argmax(v, axis=1)
-    locx = np.argmax(loct)
+    max_index = np.unravel_index(np.argmax(v), v.shape)
+    locx = max_index[0]
     COP = locx * dx
     plt.plot(t_tot, np.ones_like(t_tot)*COP, '--w', label='COP')
 
@@ -93,7 +93,7 @@ def plot_heatmap_disp(x, t_tot, c, v, idxs, colors, dx):
     plt.xlabel(r'$t$')
     plt.ylabel(r'$x$')
     plt.grid(True)
-    plt.title('2D v map')
+    plt.title('2D v_mid map')
     plt.show()
 
 def plot_heatmap_bm(x, t_tot, c, bm, idxs, colors, dx):
@@ -110,9 +110,14 @@ def plot_heatmap_bm(x, t_tot, c, bm, idxs, colors, dx):
             ti = t_tot[idxs[0][j][i]:idxs[1][j][i]]
             plt.plot(ti, c*(ti-ti[0]), '--', color=color)
 
-    # add COP BM
+    max_index = np.unravel_index(np.argmax(bm), bm.shape)
+    locx = max_index[0]
+    COP = locx * dx
+    plt.plot(t_tot, np.ones_like(t_tot)*COP, '--w', label='COP')
 
-    plt.colorbar(pcm, label=r'$BM(x,t)$')
+    cbar = plt.colorbar(pcm, label=r'$BM(x,t)$')
+    cbar.formatter.set_powerlimits((0, 0))
+
     plt.xlabel(r'$t$')
     plt.ylabel(r'$x$')
     plt.grid(True)

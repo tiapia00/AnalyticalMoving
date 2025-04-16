@@ -3,6 +3,10 @@ from plot_utils import plot_multi_disp_mid, plot_heatmap_disp, plot_heatmap_bm
 from beam import Beam
 import numpy as np
 import matplotlib.pyplot as plt
+# plt.rcParams.update({
+#     "text.usetex": True,
+#     "font.family": "Helvetica"
+# })
 
 ni = np.array([2, 2])
 di = np.array([1.5, 1.5])
@@ -10,7 +14,7 @@ dij = np.array([2])
 
 Pi = np.array([10, 100])
 
-c = 30
+c = 60
 l = 25
 E = 3.5e10
 J = 3.8349
@@ -42,6 +46,3 @@ v, bm, tis, vis = get_multi_v_bm(my_beam, t_tot, idxs, Pi)
 plot_multi_disp_mid(t_tot, v, tis, vis, colors)
 plot_heatmap_disp(my_beam.x, t_tot, c, v, idxs, colors, dx)
 plot_heatmap_bm(my_beam.x, t_tot, c, bm, idxs, colors, dx)
-plt.figure()
-plt.plot(t_tot, bm[bm.shape[0]//2, :])
-plt.show()

@@ -162,10 +162,12 @@ def get_multi_v_bm(my_beam: Beam, t_tot, idxs, Pi):
     v = np.zeros((my_beam.x.shape[0], t_tot.shape[0]))
     bm = np.zeros((my_beam.x.shape[0], t_tot.shape[0]))
     v0_init = my_beam.v0
+    M0_init = my_beam.M0
     tis = []
     vis = []
     for j in range(len(idxs[0])):
         my_beam.v0 = v0_init * Pi[j]
+        my_beam.M0 = M0_init * Pi[j]
         tj = []
         vj = []
         for i in range(len(idxs[0][0])):
@@ -174,26 +176,26 @@ def get_multi_v_bm(my_beam: Beam, t_tot, idxs, Pi):
             my_beam.t = t_single
             vi = my_beam.get_v(my_beam.alpha)
             bmi = my_beam.get_bm(my_beam.alpha)
+
+            v[:, idxs[0][j][i]:idxs[1][j][i]] += vi
+            bm[:, idxs[0][j][i]:idxs[1][j][i]] += bmi
+
             v0i = vi[:, -1].reshape(-1,1)
             v0i_dot = my_beam.get_v_dot(my_beam.alpha)[:,-1].reshape(-1,1)
-
             vi_free, bm_free = my_beam.get_free_response(v0i, v0i_dot, t_tot[idxs[1][j][i]:] - t_tot[idxs[1][j][i]])
-            v[:, idxs[0][j][i]:idxs[1][j][i]] += vi
-            v[:, idxs[1][j][i]:] += vi_free
 
-            bm[:, idxs[0][j][i]:idxs[1][j][i]] += bmi
+            v[:, idxs[1][j][i]:] += vi_free
             bm[:, idxs[1][j][i]:] += bm_free
 
             tji = np.concatenate((t_single + t0, t_tot[idxs[1][j][i]:]))
             tj.append(tji)
             vji = np.concatenate((vi, vi_free), axis=1)
             vj.append(vji)
-            '''
-            plt.figure()
-            plt.plot(t_tot[idxs[0][j][i]:idxs[1][j][i]], vi[vi.shape[0]//2, :])
-            plt.plot(t_tot[idxs[1][j][i]:], vi_free[vi_free.shape[0]//2, :])
-            plt.show()
-            '''
+
+            # plt.figure()
+            # plt.plot(t_tot[idxs[0][j][i]:idxs[1][j][i]], vi[vi.shape[0]//2, :])
+            # plt.plot(t_tot[idxs[1][j][i]:], vi_free[vi_free.shape[0]//2, :])
+            # plt.show()
 
         tis.append(tj)
         vis.append(vj)
