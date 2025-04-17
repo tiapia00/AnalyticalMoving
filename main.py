@@ -1,4 +1,10 @@
-from plot_utils import plot_disp_mid, plot_bm_mid, plot_disp_mid_tot, plot_mode_contr, plot_sweep_alpha
+from plot_utils import (
+    plot_disp_mid,
+    plot_bm_mid,
+    plot_disp_mid_tot,
+    plot_mode_contr,
+    plot_sweep_alpha
+    )
 import numpy as np
 from beam import Beam
 from utils import sweep_alpha_mid, sweep_alpha_max, verify_results, sweep_alpha_matlab
