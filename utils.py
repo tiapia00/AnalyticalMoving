@@ -1,9 +1,14 @@
+import importlib.util
 from beam import Beam
 import numpy as np
 import scipy.io
 import matplotlib.pyplot as plt
 from scipy.interpolate import interp1d
-import matlab.engine
+module = 'matlab'
+if importlib.util.find_spec(module) is not None:
+    matlab = importlib.import_module(module)
+import sys
+
 
 def sweep_alpha_mid(my_beam: Beam, alphas: np.ndarray):
     vs_mid = []
@@ -201,7 +206,12 @@ def get_multi_v_bm(my_beam: Beam, t_tot, idxs, Pi):
 
     return v, bm, tis, vis
 
-def sweep_alpha_matlab(alphas: np.ndarray, script_path: str, data_mat: dict, v0, bm0):
+
+def sweep_alpha_matlab(alphas: np.ndarray,
+                       script_path: str,
+                       data_mat: dict,
+                       v0,
+                       bm0):
     eng = matlab.engine.start_matlab()
     eng.cd(script_path, nargout=0)
     vsmax = []
@@ -222,5 +232,3 @@ def sweep_alpha_matlab(alphas: np.ndarray, script_path: str, data_mat: dict, v0,
         bmsmax.append(np.max(bm)/bm0)
 
     return vsmax, bmsmax
-
-

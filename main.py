@@ -1,3 +1,4 @@
+from pathlib import Path
 from plot_utils import (
     plot_disp_mid,
     plot_bm_mid,
@@ -8,15 +9,16 @@ from plot_utils import (
 import numpy as np
 from beam import Beam
 from utils import sweep_alpha_mid, sweep_alpha_max, verify_results, sweep_alpha_matlab
-import matlab.engine
 from scipy.io import savemat
+import matplotlib
+matplotlib.use("Agg")
 
 # SI units
 
 # Input data
-l = 25
+length = 25
 c = 30
-T = l/c
+T = length/c
 P = 1e4
 E = 3.5e10
 J = 3.8349*0.7
@@ -25,9 +27,9 @@ n_modes = 10
 damp_ratio = 0
 t_free = 0.5
 
-generate_verify = True
+generate_verify = False
 data_mat = {
-    'l': float(l),
+    'length': float(length),
     'c': float(c),
     'P': float(P),
     'E': float(E),
@@ -37,12 +39,13 @@ data_mat = {
 }
 
 if generate_verify:
+    import matlab.engine
     savemat('data.mat', data_mat)
 
 nx = 101
 nt = 101
 
-my_beam = Beam(l, mu, E, J, damp_ratio, n_modes, nx, nt, P, c)
+my_beam = Beam(length, mu, E, J, damp_ratio, n_modes, nx, nt, P, c)
 v, contr_v = my_beam.get_v(my_beam.alpha, True)
 bm, contr_bm = my_beam.get_bm(my_beam.alpha, True)
 bm_static = my_beam.get_bm(0)
@@ -54,9 +57,12 @@ plot_bm_mid(my_beam, bm, bm_static)
 plot_mode_contr(contr_bm, 'BM')
 
 t_free = np.linspace(0, t_free, nt)
-v0 = v[:,-1].reshape(-1,1)
+v0 = v[:, -1].reshape(-1, 1)
 v0_dot = my_beam.get_v_dot(my_beam.alpha)
-v_free, bm_free = my_beam.get_free_response(v0, v0_dot[:,-1].reshape(-1,1), t_free)
+v_free, bm_free = my_beam.get_free_response(
+    v0,
+    v0_dot[:, -1].reshape(-1, 1),
+    t_free)
 plot_disp_mid_tot(my_beam, v, v_free, t_free)
 
 alphas = np.linspace(0, 0.5, 10)
@@ -75,7 +81,8 @@ if generate_verify:
     eng.main_single(nargout=0)
     eng.quit()
 
-verify_results(v_mid, bm_mid, my_beam.v0, my_beam.M0, my_beam.t)
+file_path = Path('Verification.mat')
+if file_path.is_file():
+    verify_results(v_mid, bm_mid, my_beam.v0, my_beam.M0, my_beam.t)
 #vsver, bmsver = sweep_alpha_matlab(alphas, script_path, data_mat, my_beam.v0, my_beam.M0)
 #plot_sweep_alpha_ver(vs_mid, bms_mid, vsver, bmsver, alphas)
-

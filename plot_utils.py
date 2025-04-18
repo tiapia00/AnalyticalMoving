@@ -3,13 +3,14 @@ import numpy as np
 
 from beam import Beam
 
+
 def plot_disp_mid(my_beam: Beam, v):
     plt.figure()
     plt.plot(my_beam.x, v[v.shape[0]//2, :])
     plt.xlabel(r'$t$')
     plt.ylabel(r'$v_{mid}$')
-    plt.title('Displacement at mid-span')
-    plt.show()
+    plt.savefig('figs/Displacement_mid.png')
+    plt.close()
 
 def plot_bm_mid(my_beam: Beam, bm, bm_static):
     plt.figure()
@@ -18,19 +19,21 @@ def plot_bm_mid(my_beam: Beam, bm, bm_static):
     plt.ticklabel_format(style='sci', axis='both', scilimits=(0, 0))
     plt.xlabel(r'$t$')
     plt.ylabel(r'$BM_{mid}$')
-    plt.title('BM at mid-span')
-    plt.show()
+    plt.savefig('figs/BM_mid.png')
+    plt.close()
 
 def plot_disp_mid_tot(my_beam: Beam, v_force, v_free, t_free):
     plt.figure()
-    plt.plot(my_beam.t, v_force[v_force.shape[0]//2, :], label='Forced response')
+    plt.plot(my_beam.t,
+             v_force[v_force.shape[0]//2, :], label='Forced response')
     t0 = my_beam.t[-1]
     plt.plot(t0 + t_free, v_free[v_free.shape[0]//2, :], label='Free response')
     plt.xlabel(r'$t$')
     plt.ylabel(r'$v_{mid}$')
-    plt.title('Displacement at mid-span')
+    plt.savefig('figs/Displacement_tot.png')
     plt.legend()
-    plt.show()
+    plt.close()
+
 
 def plot_mode_contr(mode_contr, ident: str):
     n_modes = len(mode_contr)
@@ -38,8 +41,9 @@ def plot_mode_contr(mode_contr, ident: str):
     plt.figure()
     plt.plot(n_modes, mode_contr, 'o')
     plt.xlabel('Mode')
-    plt.title('Mode contribution ' + ident)
-    plt.show()
+    plt.savefig(f'Mode contribution_{ident}.png')
+    plt.close()
+
 
 def plot_sweep_alpha(vs_mid, bms_mid, vs_max, bms_max, alphas):
     plt.figure()
@@ -48,7 +52,8 @@ def plot_sweep_alpha(vs_mid, bms_mid, vs_max, bms_max, alphas):
     plt.legend()
     plt.xlabel(r'$\alpha$')
     plt.ylabel(r'$DAF_v$')
-    plt.show()
+    plt.savefig('figs/DAF_v.png')
+    plt.close()
 
     plt.figure()
     plt.plot(alphas, bms_mid, label='DAF')
@@ -56,7 +61,9 @@ def plot_sweep_alpha(vs_mid, bms_mid, vs_max, bms_max, alphas):
     plt.legend()
     plt.xlabel(r'$\alpha$')
     plt.ylabel(r'$DAF_{BM}$')
-    plt.show()
+    plt.savefig('figs/DAF_BM.png')
+    plt.close()
+
 
 def plot_sweep_alpha_ver(vs_mid, bms_mid, vs_ver, bms_ver, alphas):
     plt.figure()
@@ -65,7 +72,7 @@ def plot_sweep_alpha_ver(vs_mid, bms_mid, vs_ver, bms_ver, alphas):
     plt.legend()
     plt.xlabel(r'$\alpha$')
     plt.ylabel(r'$DAF_v$')
-    plt.show()
+    plt.close()
 
     plt.figure()
     plt.plot(alphas, bms_mid, label='DAF_Python')
@@ -75,17 +82,6 @@ def plot_sweep_alpha_ver(vs_mid, bms_mid, vs_ver, bms_ver, alphas):
     plt.ylabel(r'$DAF_{BM}$')
     plt.show()
 
-def plot_multi_disp_mid(t_tot, v, tis, vis, colors):
-    plt.plot(t_tot, v[v.shape[0] // 2, :], label='v', color='black')
-    for j in range(len(tis)):
-        for i in range(len(tis[j])):
-            plt.plot(tis[i][j], vis[i][j][vis[i][j].shape[0] // 2, :], '--', color=colors[i])
-        # color is related to the magnitude, so associated with the first index
-    plt.xlabel(r'$t$')
-    plt.legend()
-    plt.ylabel(r'$v_{mid}$')
-    plt.title('Displacement at midspan')
-    plt.show()
 
 def plot_heatmap_disp(x, t_tot, c, v, idxs, colors, dx):
     X, T = np.meshgrid(x, t_tot, indexing='ij')
@@ -110,8 +106,9 @@ def plot_heatmap_disp(x, t_tot, c, v, idxs, colors, dx):
     plt.xlabel(r'$t$')
     plt.ylabel(r'$x$')
     plt.grid(True)
-    plt.title('2D v map')
-    plt.show()
+    plt.savefig('figs/v_map.png')
+    plt.close()
+
 
 def plot_heatmap_bm(x, t_tot, c, bm, idxs, colors, dx):
     X, T = np.meshgrid(x, t_tot, indexing='ij')
@@ -133,5 +130,5 @@ def plot_heatmap_bm(x, t_tot, c, bm, idxs, colors, dx):
     plt.xlabel(r'$t$')
     plt.ylabel(r'$x$')
     plt.grid(True)
-    plt.title('2D BM map')
-    plt.show()
+    plt.savefig('figs/BM_map.png')
+    plt.close()
