@@ -1,3 +1,4 @@
+from pathlib import Path
 import matplotlib.pyplot as plt
 import numpy as np
 
@@ -12,6 +13,7 @@ def plot_disp_mid(my_beam: Beam, v):
     plt.savefig('figs/Displacement_mid.png')
     plt.close()
 
+
 def plot_bm_mid(my_beam: Beam, bm, bm_static):
     plt.figure()
     plt.plot(my_beam.x, bm[bm.shape[0]//2, :], label='dynamic')
@@ -21,6 +23,7 @@ def plot_bm_mid(my_beam: Beam, bm, bm_static):
     plt.ylabel(r'$BM_{mid}$')
     plt.savefig('figs/BM_mid.png')
     plt.close()
+
 
 def plot_disp_mid_tot(my_beam: Beam, v_force, v_free, t_free):
     plt.figure()
@@ -41,7 +44,7 @@ def plot_mode_contr(mode_contr, ident: str):
     plt.figure()
     plt.plot(n_modes, mode_contr, 'o')
     plt.xlabel('Mode')
-    plt.savefig(f'Mode contribution_{ident}.png')
+    plt.savefig(f'figs/Mode contribution_{ident}.png')
     plt.close()
 
 
