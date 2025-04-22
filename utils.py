@@ -74,18 +74,16 @@ def verify_results(v_mid, bm_mid, v0_sum, bm0_sum, t):
     plt.plot(t, v_ver_res/v0_sum, label='verification')
     plt.xlabel('t')
     plt.ylabel('v/v0ii')
-    plt.title('Verification mid-span displacement')
     plt.legend()
-    plt.show()
+    plt.savefig('figs/multi/Verification mid-span displacement.png')
 
     plt.figure()
     plt.plot(t, bm_mid/bm0_sum, label='calculated')
     plt.plot(t, bm_ver_res/bm0_sum, label='verification')
     plt.xlabel('t')
-    plt.ylabel('bm/bm0ii')
-    plt.title('Verification mid-span BM')
     plt.legend()
-    plt.show()
+    plt.ylabel('bm/bm0ii')
+    plt.savefig('figs/multi/Verification mid-span BM.png')
 
     print(f'err_v = {np.abs(err_v)*100:.2f}%')
     print(f'err_M = {np.abs(err_M)*100:.2f}%')
@@ -165,14 +163,18 @@ def get_multi_v_bm(my_beam: Beam, t_tot, idxs, Pi):
     M0_init = my_beam.M0
     tis = []
     vis = []
+    bmis = []
+
     for j in range(len(idxs[0])):
         my_beam.v0 = v0_init * Pi[j]/Pi[0]
         my_beam.M0 = M0_init * Pi[j]/Pi[0]
         tj = []
         vj = []
+        bmj = []
         for i in range(len(idxs[0][0])):
             t0 = t_tot[idxs[0][j][i]]
             t_single = t_tot[idxs[0][j][i]:idxs[1][j][i]] - t0
+            idx_forced = len(t_single)
             my_beam.t = t_single
             vi = my_beam.get_v(my_beam.alpha)
             bmi = my_beam.get_bm(my_beam.alpha)
@@ -185,19 +187,17 @@ def get_multi_v_bm(my_beam: Beam, t_tot, idxs, Pi):
             vi_free, bm_free = my_beam.get_free_response(v0i, v0i_dot, t_tot[idxs[1][j][i]:] - t_tot[idxs[1][j][i]])
 
             v[:, idxs[1][j][i]:] += vi_free
-            #bm[:, idxs[1][j][i]:] += bm_free
+            bm[:, idxs[1][j][i]:] += bm_free
 
             tji = np.concatenate((t_single + t0, t_tot[idxs[1][j][i]:]))
             tj.append(tji)
             vji = np.concatenate((vi, vi_free), axis=1)
             vj.append(vji)
-
-            # plt.figure()
-            # plt.plot(t_tot[idxs[0][j][i]:idxs[1][j][i]], vi[vi.shape[0]//2, :])
-            # plt.plot(t_tot[idxs[1][j][i]:], vi_free[vi_free.shape[0]//2, :])
-            # plt.show()
+            bmi = np.concatenate((bmi, bm_free), axis=1)
+            bmj.append(bmi)
 
         tis.append(tj)
         vis.append(vj)
+        bmis.append(bmj)
 
-    return v, bm, tis, vis
+    return v, bm, tis, vis, bmis, idx_forced

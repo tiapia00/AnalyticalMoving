@@ -1,9 +1,10 @@
 from utils import build_time_array, get_multi_v_bm, verify_results
-from plot_utils import plot_multi_disp_mid, plot_heatmap_disp, plot_heatmap_bm
+from plot_utils import plot_multi_disp_mid, plot_heatmap_disp, plot_heatmap_bm, plot_multi_bm_mid
 from beam import Beam
 import numpy as np
 from scipy.io import savemat
 import matlab.engine
+import os
 
 ni = np.array([2, 2])
 di = np.array([1.5, 1.5])
@@ -21,7 +22,7 @@ nx = 101
 nt = 101
 damp_ratio = 0
 colors = ['red', 'blue']
-generate_verify = True
+generate_verify = False
 
 data_mat = {
     'l': float(l),
@@ -48,7 +49,7 @@ alpha = omega/my_beam.return_omega_j(1)
 
 # idxs[0][0] -> P1 entering
 t_tot, idxs = build_time_array(my_beam, Pi, di, ni, dij, nt, c)
-v, bm, tis, vis = get_multi_v_bm(my_beam, t_tot, idxs, Pi)
+v, bm, tis, vis, bmis, idx_forced = get_multi_v_bm(my_beam, t_tot, idxs, Pi)
 
 # tis[i][j]
 # i = 0 -> forces with magnitude P1
@@ -56,7 +57,8 @@ v, bm, tis, vis = get_multi_v_bm(my_beam, t_tot, idxs, Pi)
 # j = 0 -> 1st force
 # j = 1 -> 2nd force
 
-plot_multi_disp_mid(t_tot, v, tis, vis, colors)
+plot_multi_disp_mid(t_tot, v, tis, vis, idx_forced, colors)
+plot_multi_bm_mid(t_tot, bm, tis, bmis, idx_forced, colors)
 plot_heatmap_disp(my_beam.x, t_tot, c, v, idxs, colors, dx)
 plot_heatmap_bm(my_beam.x, t_tot, c, bm, idxs, colors, dx)
 

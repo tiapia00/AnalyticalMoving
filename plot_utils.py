@@ -8,8 +8,7 @@ def plot_disp_mid(my_beam: Beam, v):
     plt.plot(my_beam.x, v[v.shape[0]//2, :])
     plt.xlabel(r'$t$')
     plt.ylabel(r'$v_{mid}$')
-    plt.title('Displacement at mid-span')
-    plt.show()
+    plt.savefig('figs/multi/Displacement at mid-span.png')
 
 def plot_bm_mid(my_beam: Beam, bm, bm_static):
     plt.figure()
@@ -18,8 +17,7 @@ def plot_bm_mid(my_beam: Beam, bm, bm_static):
     plt.ticklabel_format(style='sci', axis='both', scilimits=(0, 0))
     plt.xlabel(r'$t$')
     plt.ylabel(r'$BM_{mid}$')
-    plt.title('BM at mid-span')
-    plt.show()
+    plt.savefig('figs/multi/BM at mid-span.png')
 
 def plot_disp_mid_tot(my_beam: Beam, v_force, v_free, t_free):
     plt.figure()
@@ -28,9 +26,8 @@ def plot_disp_mid_tot(my_beam: Beam, v_force, v_free, t_free):
     plt.plot(t0 + t_free, v_free[v_free.shape[0]//2, :], label='Free response')
     plt.xlabel(r'$t$')
     plt.ylabel(r'$v_{mid}$')
-    plt.title('Displacement at mid-span')
     plt.legend()
-    plt.show()
+    plt.savefig('figs/multi/F+F Displacement at mid-span.png')
 
 def plot_mode_contr(mode_contr, ident: str):
     n_modes = len(mode_contr)
@@ -38,8 +35,7 @@ def plot_mode_contr(mode_contr, ident: str):
     plt.figure()
     plt.plot(n_modes, mode_contr, 'o')
     plt.xlabel('Mode')
-    plt.title('Mode contribution ' + ident)
-    plt.show()
+    plt.savefig('figs/multi/Mode contribution' + ident + '.png')
 
 def plot_sweep_alpha(vs_mid, bms_mid, vs_max, bms_max, alphas):
     plt.figure()
@@ -58,17 +54,29 @@ def plot_sweep_alpha(vs_mid, bms_mid, vs_max, bms_max, alphas):
     plt.ylabel(r'$DAF_{BM}$')
     plt.show()
 
-def plot_multi_disp_mid(t_tot, v, tis, vis, colors):
+def plot_multi_disp_mid(t_tot, v, tis, vis, idx_forced, colors):
+    plt.figure()
     plt.plot(t_tot, v[v.shape[0] // 2, :], label='v', color='black')
     for j in range(len(tis)):
         for i in range(len(tis[j])):
             plt.plot(tis[i][j], vis[i][j][vis[i][j].shape[0] // 2, :], '--', color=colors[i])
+            plt.plot(tis[i][j][idx_forced], 0, 'o', color=colors[i])
         # color is related to the magnitude, so associated with the first index
     plt.xlabel(r'$t$')
-    plt.legend()
     plt.ylabel(r'$v_{mid}$')
-    plt.title('Displacement at midspan')
-    plt.show()
+    plt.savefig('figs/multi/Displacement at midspan.png')
+
+def plot_multi_bm_mid(t_tot, bm, tis, bmis, idx_forced, colors):
+    plt.figure()
+    plt.plot(t_tot, bm[bm.shape[0] // 2, :], label='bm', color='black')
+    for j in range(len(tis)):
+        for i in range(len(tis[j])):
+            plt.plot(tis[i][j], bmis[i][j][bmis[i][j].shape[0] // 2, :], '--', color=colors[i])
+            plt.plot(tis[i][j][idx_forced], 0, 'o', color=colors[i])
+        # color is related to the magnitude, so associated with the first index
+    plt.xlabel(r'$t$')
+    plt.ylabel(r'$BM_{mid}$')
+    plt.savefig('figs/multi/BM at midspan.png')
 
 def plot_heatmap_disp(x, t_tot, c, v, idxs, colors, dx):
     X, T = np.meshgrid(x, t_tot, indexing='ij')
@@ -93,8 +101,7 @@ def plot_heatmap_disp(x, t_tot, c, v, idxs, colors, dx):
     plt.xlabel(r'$t$')
     plt.ylabel(r'$x$')
     plt.grid(True)
-    plt.title('2D v_mid map')
-    plt.show()
+    plt.savefig('figs/multi/2D v_mid map.png')
 
 def plot_heatmap_bm(x, t_tot, c, bm, idxs, colors, dx):
     X, T = np.meshgrid(x, t_tot, indexing='ij')
@@ -121,5 +128,4 @@ def plot_heatmap_bm(x, t_tot, c, bm, idxs, colors, dx):
     plt.xlabel(r'$t$')
     plt.ylabel(r'$x$')
     plt.grid(True)
-    plt.title('2D BM map')
-    plt.show()
+    plt.savefig('figs/multi/2D BM map.png')
