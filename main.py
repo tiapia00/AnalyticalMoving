@@ -1,5 +1,9 @@
 from utils import build_time_array, get_multi_v_bm, verify_results
-from plot_utils import plot_multi_disp_mid, plot_heatmap_disp, plot_heatmap_bm, plot_multi_bm_mid
+from plot_utils import(
+    plot_multi_disp_mid,
+    plot_heatmap_disp,
+    plot_heatmap_bm,
+    plot_multi_bm_mid)
 from beam import Beam
 import numpy as np
 from scipy.io import savemat
