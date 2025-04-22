@@ -46,6 +46,8 @@ nx = 101
 nt = 101
 
 my_beam = Beam(length, mu, E, J, damp_ratio, n_modes, nx, nt, P, c)
+
+print(my_beam.alpha)
 v, contr_v = my_beam.get_v(my_beam.alpha, True)
 bm, contr_bm = my_beam.get_bm(my_beam.alpha, True)
 bm_static = my_beam.get_bm(0)

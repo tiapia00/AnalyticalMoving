@@ -10,7 +10,7 @@ def plot_disp_mid(my_beam: Beam, v):
     plt.plot(my_beam.x, v[v.shape[0]//2, :])
     plt.xlabel(r'$t$')
     plt.ylabel(r'$v_{mid}$')
-    plt.savefig('figs/Displacement_mid.png')
+    plt.savefig('figs/single/Displacement_mid.png')
     plt.close()
 
 
@@ -21,7 +21,7 @@ def plot_bm_mid(my_beam: Beam, bm, bm_static):
     plt.ticklabel_format(style='sci', axis='both', scilimits=(0, 0))
     plt.xlabel(r'$t$')
     plt.ylabel(r'$BM_{mid}$')
-    plt.savefig('figs/BM_mid.png')
+    plt.savefig('figs/single/BM_mid.png')
     plt.close()
 
 
@@ -33,7 +33,7 @@ def plot_disp_mid_tot(my_beam: Beam, v_force, v_free, t_free):
     plt.plot(t0 + t_free, v_free[v_free.shape[0]//2, :], label='Free response')
     plt.xlabel(r'$t$')
     plt.ylabel(r'$v_{mid}$')
-    plt.savefig('figs/Displacement_tot.png')
+    plt.savefig('figs/single/Displacement_tot.png')
     plt.legend()
     plt.close()
 
@@ -44,7 +44,7 @@ def plot_mode_contr(mode_contr, ident: str):
     plt.figure()
     plt.plot(n_modes, mode_contr, 'o')
     plt.xlabel('Mode')
-    plt.savefig(f'figs/Mode contribution_{ident}.png')
+    plt.savefig(f'figs/single/Mode contribution_{ident}.png')
     plt.close()
 
 
@@ -55,7 +55,7 @@ def plot_sweep_alpha(vs_mid, bms_mid, vs_max, bms_max, alphas):
     plt.legend()
     plt.xlabel(r'$\alpha$')
     plt.ylabel(r'$DAF_v$')
-    plt.savefig('figs/DAF_v.png')
+    plt.savefig('figs/single/DAF_v.png')
     plt.close()
 
     plt.figure()
@@ -64,7 +64,7 @@ def plot_sweep_alpha(vs_mid, bms_mid, vs_max, bms_max, alphas):
     plt.legend()
     plt.xlabel(r'$\alpha$')
     plt.ylabel(r'$DAF_{BM}$')
-    plt.savefig('figs/DAF_BM.png')
+    plt.savefig('figs/single/DAF_BM.png')
     plt.close()
 
 
@@ -109,7 +109,7 @@ def plot_heatmap_disp(x, t_tot, c, v, idxs, colors, dx):
     plt.xlabel(r'$t$')
     plt.ylabel(r'$x$')
     plt.grid(True)
-    plt.savefig('figs/v_map.png')
+    plt.savefig('figs/single/v_map.png')
     plt.close()
 
 
@@ -133,5 +133,5 @@ def plot_heatmap_bm(x, t_tot, c, bm, idxs, colors, dx):
     plt.xlabel(r'$t$')
     plt.ylabel(r'$x$')
     plt.grid(True)
-    plt.savefig('figs/BM_map.png')
+    plt.savefig('figs/single/BM_map.png')
     plt.close()
