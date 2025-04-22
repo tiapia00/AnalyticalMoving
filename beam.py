@@ -33,8 +33,8 @@ class Beam:
             if j == alpha:
                 if beta != 0:
                     v_j *= (np.exp(-self.omega_d*gridt)*np.sin(
-                        j*self.omega*gridt)- j**2/beta * np.cos(j*self.omega*gridt) * (1-
-                                                                             np.exp(-self.omega_d*gridt)))
+                            j*self.omega*gridt)- j**2/beta * np.cos(j*self.omega*gridt) *
+                            (1 - np.exp(-self.omega_d*gridt)))
                 else:
                     v_j *= (np.sin(j * self.omega * gridt) -
                             j * self.omega * gridt * np.cos(j * self.omega * gridt))
