@@ -17,13 +17,13 @@ matplotlib.use("Agg")
 
 # Input data
 length = 25
-c = 30
+c = 282.85
 T = length/c
 P = 1e4
 E = 3.5e10
 J = 3.8349*0.7
 mu = 18358
-n_modes = 10
+n_modes = 50
 damp_ratio = 0
 t_free = 0.5
 
@@ -46,7 +46,6 @@ nx = 101
 nt = 101
 
 my_beam = Beam(length, mu, E, J, damp_ratio, n_modes, nx, nt, P, c)
-
 print(my_beam.alpha)
 v, contr_v = my_beam.get_v(my_beam.alpha, True)
 bm, contr_bm = my_beam.get_bm(my_beam.alpha, True)
@@ -83,7 +82,7 @@ if file_path.is_file():
     verify_results(v_mid, bm_mid, my_beam.v0, my_beam.M0, my_beam.t)
 
 # Careful: here modifying attributes of Beam class
-alphas = np.linspace(0, 2, 100)
+alphas = np.linspace(0, 0.8, 100)
 vs_mid, bms_mid = sweep_alpha_mid(my_beam, alphas)
 vs_max, bms_max = sweep_alpha_max(my_beam, alphas)
 plot_sweep_alpha(vs_mid, bms_mid, vs_max, bms_max, alphas)

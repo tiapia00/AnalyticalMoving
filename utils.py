@@ -17,8 +17,8 @@ def sweep_alpha_mid(my_beam: Beam, alphas: np.ndarray):
     for alpha in alphas:
         if alpha != 0:
             my_beam.omega = omega_init * alpha
-            t = np.pi/my_beam.omega
-            my_beam.t = np.linspace(0, t, my_beam.t.shape[0])
+            T = np.pi/my_beam.omega
+            my_beam.t = np.linspace(0, T, my_beam.t.shape[0])
         # So alpha and its definition stay consistent
 
         v = my_beam.get_v(alpha)
@@ -32,6 +32,7 @@ def sweep_alpha_mid(my_beam: Beam, alphas: np.ndarray):
 
     vs_mid = np.array(vs_mid)
     bms_mid = np.array(bms_mid)
+    print(f'DAFBM_0 = {bms_mid[0]}')
 
     return vs_mid, bms_mid
 
@@ -40,7 +41,6 @@ def sweep_alpha_max(my_beam: Beam, alphas: np.ndarray):
     bms_mid = []
     omega_init = my_beam.omega
     for alpha in alphas:
-
         if alpha != 0:
             my_beam.omega = omega_init * alpha
             t = np.pi/my_beam.omega
