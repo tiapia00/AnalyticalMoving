@@ -17,6 +17,8 @@ def sweep_alpha_mid(my_beam: Beam, alphas: np.ndarray):
     for alpha in alphas:
         if alpha != 0:
             my_beam.omega = omega_init * alpha
+            t = np.pi/my_beam.omega
+            my_beam.t = np.linspace(0, t, my_beam.t.shape[0])
         # So alpha and its definition stay consistent
 
         v = my_beam.get_v(alpha)
@@ -38,8 +40,11 @@ def sweep_alpha_max(my_beam: Beam, alphas: np.ndarray):
     bms_mid = []
     omega_init = my_beam.omega
     for alpha in alphas:
+
         if alpha != 0:
             my_beam.omega = omega_init * alpha
+            t = np.pi/my_beam.omega
+            my_beam.t = np.linspace(0, t, my_beam.t.shape[0])
         # So alpha and its definition stay consistent
 
         v = my_beam.get_v(alpha)
@@ -54,7 +59,7 @@ def sweep_alpha_max(my_beam: Beam, alphas: np.ndarray):
     return vs_mid, bms_mid
 
 def verify_results(v_mid, bm_mid, v0, M0, t):
-    mat_ver = scipy.io.loadmat('Verification.mat')
+    mat_ver = scipy.io.loadmat('Verification_single.mat')
     v_ver = mat_ver['U_xt']
     bm_ver = mat_ver['BM_xt']
     node_mid = mat_ver['node_midspan'].item()
