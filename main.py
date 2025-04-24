@@ -11,22 +11,26 @@ import matlab.engine
 import os
 
 ni = np.array([2, 2])
-di = np.array([1.5, 1.5])
-dij = np.array([2])
+di = np.array([4, 1.5])
+dij = np.array([1])
 
-Pi = np.array([10, 100])
+Ptot = 2.8e4 * 9.81
+perc_back = 0.7
+Pi = np.array([(1-perc_back)*Ptot, perc_back*Ptot])
 
-c = 60
+c = 30
 l = 25
 E = 3.5e10
-J = 3.8349
-mu = 18358
-n_modes = 10
+h = 0.75
+b = 11
+J = b*h**3/12
+mu = 20897.25
+n_modes = 50
 nx = 101
 nt = 101
 damp_ratio = 0
 colors = ['red', 'blue']
-generate_verify = False
+generate_verify = True
 
 data_mat = {
     'l': float(l),
@@ -44,6 +48,7 @@ data_mat = {
 savemat('data_multi.mat', data_mat)
 
 my_beam = Beam(l, mu, E, J, damp_ratio, n_modes, nx, nt, Pi[0], c)
+print(my_beam.alpha)
 dx = my_beam.x[1] - my_beam.x[0]
 
 omega = np.pi*c/l
@@ -74,4 +79,11 @@ if generate_verify:
     eng.main_multi(nargout=0)
     eng.quit()
 
-verify_results(v[v.shape[0]//2, :], bm[bm.shape[0]//2, :], np.sum(v0i), np.sum(M0i), t_tot)
+v0ii = ni * v0i
+v0ii = np.sum(v0ii)
+
+M0ii = ni * M0i
+M0ii = np.sum(M0ii)
+print(M0ii)
+
+verify_results(v[v.shape[0]//2, :], bm[bm.shape[0]//2, :], v0ii, M0ii, t_tot)
