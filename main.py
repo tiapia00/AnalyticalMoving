@@ -81,7 +81,6 @@ file_path = Path('Verification.mat')
 if file_path.is_file():
     verify_results(v_mid, bm_mid, my_beam.v0, my_beam.M0, my_beam.t)
 
-# Careful: here modifying attributes of Beam class
 cs = np.linspace(0, 200)
 alphas = cs*np.pi/length/my_beam.return_omega_j(1)
 vs_mid, bms_mid, vs_max, bms_max = sweep_alpha(my_beam, damp_ratio, nx, nt, P, cs)
