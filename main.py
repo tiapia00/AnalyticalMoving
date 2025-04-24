@@ -12,12 +12,13 @@ from utils import sweep_alpha, verify_results
 from scipy.io import savemat
 import matplotlib
 matplotlib.use("Agg")
+import matplotlib.pyplot as plt
 
 # SI units
 
 # Input data
 length = 25
-c = 30
+c = 40
 T = length/c
 P = 1e4
 E = 3.5e10
@@ -35,12 +36,9 @@ data_mat = {
     'E': float(E),
     'J': float(J),
     'mu': float(mu),
-    'damp_ratio': float(damp_ratio)
+    'damp_ratio': float(damp_ratio),
 }
 
-if generate_verify:
-    import matlab.engine
-    savemat('data.mat', data_mat)
 
 nx = 101
 nt = 101
@@ -70,16 +68,36 @@ v_mid = v[v.shape[0]//2, :]
 bm_mid = bm[bm.shape[0]//2, :]
 
 script_path = r'C:\Users\mattiaan\Documents\MATLAB\VBI-2D'
-if generate_verify:
-    eng = matlab.engine.start_matlab()
-    eng.cd(script_path, nargout=0)
-    eng.addpath(eng.genpath(script_path))
-    eng.main_single(nargout=0)
-    eng.quit()
 
 file_path = Path('Verification.mat')
 if file_path.is_file():
-    verify_results(v_mid, bm_mid, my_beam.v0, my_beam.M0, my_beam.t)
+    if generate_verify:
+        import matlab.engine
+        eng = matlab.engine.start_matlab()
+        n_els = np.arange(40, 100, 10)
+        print(n_els)
+        eng.cd(script_path, nargout=0)
+        eng.addpath(eng.genpath(script_path))
+
+        errs_v = []
+        errs_m = []
+
+        for n_el in n_els:
+            data_mat['nel'] = np.float64(n_el)
+            savemat('data.mat', data_mat)
+            eng.main_single(nargout=0)
+            err_v, err_m = verify_results(v_mid, bm_mid, my_beam.v0, my_beam.M0, my_beam.t, True)
+            errs_v.append(err_v)
+            errs_m.append(err_m)
+        eng.quit()
+
+        plt.figure()
+        plt.plot(n_els, np.array(errs_v)*100, label='err_v')
+        plt.plot(n_els, np.array(errs_m)*100, label='err_BM')
+        plt.legend()
+        plt.xlabel(r'$n_{ele}$')
+        plt.ylabel(r'[%]')
+        plt.savefig('figs/single/sens_nele.png')
 
 cs = np.linspace(0, 200)
 alphas = cs*np.pi/length/my_beam.return_omega_j(1)

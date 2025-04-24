@@ -38,7 +38,7 @@ def sweep_alpha(my_beam: Beam, damp_ratio, nx, nt, load, cs):
 
     return vs_mid, bms_mid, vs_max, bms_max
 
-def verify_results(v_mid, bm_mid, v0, M0, t):
+def verify_results(v_mid, bm_mid, v0, M0, t, sup_plots: bool):
     mat_ver = scipy.io.loadmat('Verification_single.mat')
     v_ver = mat_ver['U_xt']
     bm_ver = mat_ver['BM_xt']
@@ -60,24 +60,27 @@ def verify_results(v_mid, bm_mid, v0, M0, t):
     err_v = np.mean(np.abs(v_ver_res - v_mid)/v0)
     err_M = np.mean(np.abs(bm_ver_res - bm_mid)/M0)
 
-    plt.figure()
-    plt.plot(t, v_mid/v0, label='calculated')
-    plt.plot(t, v_ver_res/v0, label='verification')
-    plt.xlabel('t')
-    plt.ylabel('v/v_0')
-    plt.legend()
-    plt.savefig('figs/single/midspandispver.png')
+    if not sup_plots:
+        plt.figure()
+        plt.plot(t, v_mid/v0, label='calculated')
+        plt.plot(t, v_ver_res/v0, label='verification')
+        plt.xlabel('t')
+        plt.ylabel('v/v_0')
+        plt.legend()
+        plt.savefig('figs/single/midspandispver.png')
 
-    plt.figure()
-    plt.plot(t, bm_mid/M0, label='calculated')
-    plt.plot(t, bm_ver_res/M0, label='verification')
-    plt.xlabel('t')
-    plt.ylabel('BM/BM_0')
-    plt.legend()
-    plt.savefig('figs/single/midspanbmver.png')
+        plt.figure()
+        plt.plot(t, bm_mid/M0, label='calculated')
+        plt.plot(t, bm_ver_res/M0, label='verification')
+        plt.xlabel('t')
+        plt.ylabel('BM/BM_0')
+        plt.legend()
+        plt.savefig('figs/single/midspanbmver.png')
 
-    print(f'err_v = {np.abs(err_v)*100:.2f}%')
-    print(f'err_M = {np.abs(err_M)*100:.2f}%')
+    print(f'err_v = {err_v*100:.2f}%')
+    print(f'err_M = {err_M*100:.2f}%')
+
+    return err_v, err_M
 
 def build_time_array(my_beam: Beam, Pi, di, ni, dij, nt, c):
     t0 = 0
