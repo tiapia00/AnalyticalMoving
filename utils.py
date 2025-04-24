@@ -66,8 +66,8 @@ def verify_results(v_mid, bm_mid, v0_sum, bm0_sum, t):
     bm_ver_interp = interp1d(t_ver, bm_ver_mid, kind=interp_order)
     bm_ver_res = bm_ver_interp(t)
 
-    err_v = np.mean((v_ver_res - v_mid)/v0_sum)
-    err_M = np.mean((bm_ver_res - bm_mid)/bm0_sum)
+    err_v = np.mean(np.abs(v_ver_res - v_mid)/v0_sum)
+    err_M = np.mean(np.abs(bm_ver_res - bm_mid)/bm0_sum)
 
     plt.figure()
     plt.plot(t, v_mid/v0_sum, label='calculated')
