@@ -10,19 +10,18 @@ if importlib.util.find_spec(module) is not None:
 import sys
 
 
-def sweep_alpha_mid(my_beam: Beam, alphas: np.ndarray):
+def sweep_alpha(my_beam: Beam, damp_ratio, nx, nt, load, cs):
     vs_mid = []
     bms_mid = []
-    omega_init = my_beam.omega
-    for alpha in alphas:
-        if alpha != 0:
-            my_beam.omega = omega_init * alpha
-            T = np.pi/my_beam.omega
-            my_beam.t = np.linspace(0, T, my_beam.t.shape[0])
-        # So alpha and its definition stay consistent
+    vs_max = []
+    bms_max = []
 
-        v = my_beam.get_v(alpha)
-        bm = my_beam.get_bm(alpha)
+    for c in cs:
+        my_beam = Beam(my_beam.l, my_beam.mu, my_beam.E, my_beam.J,
+                       damp_ratio, my_beam.n_modes, nx, nt, load, c)
+
+        v = my_beam.get_v(my_beam.alpha)
+        bm = my_beam.get_bm(my_beam.alpha)
 
         v_mid = v[v.shape[0]//2, :]
         bm_mid = bm[bm.shape[0]//2, :]
@@ -30,33 +29,14 @@ def sweep_alpha_mid(my_beam: Beam, alphas: np.ndarray):
         vs_mid.append(np.max(v_mid)/my_beam.v0)
         bms_mid.append(np.max(bm_mid)/my_beam.M0)
 
+        vs_max.append(np.max(v)/my_beam.v0)
+        bms_max.append(np.max(bm)/my_beam.M0)
+
     vs_mid = np.array(vs_mid)
     bms_mid = np.array(bms_mid)
     print(f'DAFBM_0 = {bms_mid[0]}')
 
-    return vs_mid, bms_mid
-
-def sweep_alpha_max(my_beam: Beam, alphas: np.ndarray):
-    vs_mid = []
-    bms_mid = []
-    omega_init = my_beam.omega
-    for alpha in alphas:
-        if alpha != 0:
-            my_beam.omega = omega_init * alpha
-            t = np.pi/my_beam.omega
-            my_beam.t = np.linspace(0, t, my_beam.t.shape[0])
-        # So alpha and its definition stay consistent
-
-        v = my_beam.get_v(alpha)
-        bm = my_beam.get_bm(alpha)
-
-        vs_mid.append(np.max(v)/my_beam.v0)
-        bms_mid.append(np.max(bm)/my_beam.M0)
-
-    vs_mid = np.array(vs_mid)
-    bms_mid = np.array(bms_mid)
-
-    return vs_mid, bms_mid
+    return vs_mid, bms_mid, vs_max, bms_max
 
 def verify_results(v_mid, bm_mid, v0, M0, t):
     mat_ver = scipy.io.loadmat('Verification_single.mat')
@@ -77,8 +57,8 @@ def verify_results(v_mid, bm_mid, v0, M0, t):
     bm_ver_interp = interp1d(t_ver, bm_ver_mid, kind=interp_order)
     bm_ver_res = bm_ver_interp(t)
 
-    err_v = np.mean(((v_ver_res - v_mid)/v0)**2)
-    err_M = np.mean(((bm_ver_res - bm_mid)/M0)**2)
+    err_v = np.mean(np.abs(v_ver_res - v_mid)/v0)
+    err_M = np.mean(np.abs(bm_ver_res - bm_mid)/M0)
 
     plt.figure()
     plt.plot(t, v_mid/v0, label='calculated')

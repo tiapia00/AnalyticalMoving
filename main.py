@@ -8,7 +8,7 @@ from plot_utils import (
     )
 import numpy as np
 from beam import Beam
-from utils import sweep_alpha_mid, sweep_alpha_max, verify_results, sweep_alpha_matlab
+from utils import sweep_alpha, verify_results
 from scipy.io import savemat
 import matplotlib
 matplotlib.use("Agg")
@@ -17,7 +17,7 @@ matplotlib.use("Agg")
 
 # Input data
 length = 25
-c = 282.85
+c = 30
 T = length/c
 P = 1e4
 E = 3.5e10
@@ -82,9 +82,9 @@ if file_path.is_file():
     verify_results(v_mid, bm_mid, my_beam.v0, my_beam.M0, my_beam.t)
 
 # Careful: here modifying attributes of Beam class
-alphas = np.linspace(0, 0.8, 100)
-vs_mid, bms_mid = sweep_alpha_mid(my_beam, alphas)
-vs_max, bms_max = sweep_alpha_max(my_beam, alphas)
+cs = np.linspace(0, 200)
+alphas = cs*np.pi/length/my_beam.return_omega_j(1)
+vs_mid, bms_mid, vs_max, bms_max = sweep_alpha(my_beam, damp_ratio, nx, nt, P, cs)
 plot_sweep_alpha(vs_mid, bms_mid, vs_max, bms_max, alphas)
 
 #vsver, bmsver = sweep_alpha_matlab(alphas, script_path, data_mat, my_beam.v0, my_beam.M0)
