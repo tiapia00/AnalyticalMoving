@@ -43,7 +43,7 @@ def plot_sweep_alpha(vs_mid, bms_mid, vs_max, bms_max, alphas):
     plt.plot(alphas, vs_max, label='FDAF')
     plt.legend()
     plt.xlabel(r'$\alpha$')
-    plt.ylabel(r'$DAF_v$')
+    plt.ylabel(r'$AF_v$')
     plt.show()
 
     plt.figure()
@@ -51,7 +51,7 @@ def plot_sweep_alpha(vs_mid, bms_mid, vs_max, bms_max, alphas):
     plt.plot(alphas, bms_max, label='FDAF')
     plt.legend()
     plt.xlabel(r'$\alpha$')
-    plt.ylabel(r'$DAF_{BM}$')
+    plt.ylabel(r'$AF_{BM}$')
     plt.show()
 
 def plot_multi_disp_mid(t_tot, v, tis, vis, idx_forced, colors):
