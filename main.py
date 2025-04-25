@@ -13,6 +13,7 @@ from scipy.io import savemat
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
+import os
 
 # SI units
 
@@ -20,7 +21,7 @@ import matplotlib.pyplot as plt
 length = 25
 c = 40
 T = length/c
-P = 1e4
+P = 3e5
 E = 3.5e10
 J = 3.8349*0.7
 mu = 18358
@@ -65,6 +66,7 @@ plot_disp_mid_tot(my_beam, v, v_free, t_free)
 
 v_mid = v[v.shape[0]//2, :]
 bm_mid = bm[bm.shape[0]//2, :]
+DAFcase = np.max(v_mid)/my_beam.v0
 
 script_path = r'C:\Users\mattiaan\Documents\MATLAB\VBI-2D'
 
@@ -106,5 +108,16 @@ alphas = cs*np.pi/length/my_beam.return_omega_j(1)
 vs_mid, bms_mid, vs_max, bms_max = sweep_alpha(my_beam, damp_ratio, nx, nt, P, cs)
 plot_sweep_alpha(vs_mid, bms_mid, vs_max, bms_max, alphas)
 
+script_dir = os.path.dirname(os.path.abspath(__file__))
+parent_dir = os.path.dirname(script_dir)
+
+file_path = os.path.join(parent_dir, "MLoadAnalytical", "data_pload.npz")
+np.savez(file_path,
+         alphas = alphas,
+         DAFV = vs_mid,
+         DAFBM = bms_mid,
+         v = np.diag(v),
+         t = my_beam.t,
+         DAFcase = DAFcase)
 #vsver, bmsver = sweep_alpha_matlab(alphas, script_path, data_mat, my_beam.v0, my_beam.M0)
 #plot_sweep_alpha_ver(vs_mid, bms_mid, vsver, bmsver, alphas)

@@ -34,7 +34,6 @@ def sweep_alpha(my_beam: Beam, damp_ratio, nx, nt, load, cs):
 
     vs_mid = np.array(vs_mid)
     bms_mid = np.array(bms_mid)
-    print(f'DAFBM_0 = {bms_mid[0]}')
 
     return vs_mid, bms_mid, vs_max, bms_max
 
