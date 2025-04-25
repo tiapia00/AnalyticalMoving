@@ -16,9 +16,9 @@ def plot_disp_mid(my_beam: Beam, v):
 
 def plot_bm_mid(my_beam: Beam, bm, bm_static):
     plt.figure()
-    plt.plot(my_beam.x, bm[bm.shape[0]//2, :], label='dynamic')
-    plt.plot(my_beam.x, bm_static[bm_static.shape[0]//2, :], label='static')
-    plt.ticklabel_format(style='sci', axis='both', scilimits=(0, 0))
+    plt.plot(my_beam.t, bm[bm.shape[0]//2, :], label='dynamic')
+    plt.plot(my_beam.t, bm_static[bm_static.shape[0]//2, :], label='static')
+    plt.ticklabel_format(style='sci', axis='y', scilimits=(0, 0))
     plt.xlabel(r'$t$')
     plt.ylabel(r'$BM_{mid}$')
     plt.savefig('figs/single/BM_mid.png')
