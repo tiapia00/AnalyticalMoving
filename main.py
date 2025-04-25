@@ -26,12 +26,13 @@ h = 0.75
 b = 11
 J = b*h**3/12
 mu = 20897.25
-n_modes = 50
-nx = 101
+n_modes = 600
+nx = 400
 nt = 101
 damp_ratio = 0
 colors = ['red', 'blue']
-generate_verify = False
+generate_verify = True
+regenerate_sweep = False
 
 data_mat = {
     'l': float(l),
@@ -72,7 +73,6 @@ plot_multi_bm_mid(t_tot, bm, tis, bmis, idx_forced, colors)
 plot_heatmap_disp(my_beam.x, t_tot, c, v, idxs, colors, dx)
 plot_heatmap_bm(my_beam.x, t_tot, c, bm, idxs, colors, dx)
 
-
 if generate_verify:
     script_path = r'C:\Users\mattiaan\Documents\MATLAB\VBI-2D'
     eng = matlab.engine.start_matlab()
@@ -95,32 +95,33 @@ alpha0 = my_beam.alpha
 c0 = c
 di0 = di[0]
 
-DAFBM = []
-dis = np.arange(2, 5, 0.5)
-c0s = np.arange(20, 40, 3)
+if regenerate_sweep:
+    DAFBM = []
+    dis = np.arange(2, 5, 0.5)
+    c0s = np.arange(20, 40, 3)
 
-for dii in dis:
-    di[0] = dii
-    DAFBM_c = []
-    for c in c0s:
-        my_beam = Beam(l, mu, E, J, damp_ratio, n_modes, nx, nt, Pi[0], c)
-        t_tot, idxs = build_time_array(my_beam, Pi, di, ni, dij, nt, c)
-        v, bm, tis, vis, bmis, idx_forced = get_multi_v_bm(my_beam, t_tot, idxs, Pi)
-        DAFBM_c.append(np.max(bm[bm.shape[0]//2, :]))
+    for dii in dis:
+        di[0] = dii
+        DAFBM_c = []
+        for c in c0s:
+            my_beam = Beam(l, mu, E, J, damp_ratio, n_modes, nx, nt, Pi[0], c)
+            t_tot, idxs = build_time_array(my_beam, Pi, di, ni, dij, nt, c)
+            v, bm, tis, vis, bmis, idx_forced = get_multi_v_bm(my_beam, t_tot, idxs, Pi)
+            DAFBM_c.append(np.max(bm[bm.shape[0]//2, :]))
 
-    DAFBM.append(DAFBM_c)
+        DAFBM.append(DAFBM_c)
 
-DAFBM = np.array(DAFBM)/M0ii
-grid_d, grid_c = np.meshgrid(dis, c0s, indexing='ij')
+    DAFBM = np.array(DAFBM)/M0ii
+    grid_d, grid_c = np.meshgrid(dis, c0s, indexing='ij')
 
-fig = plt.figure(figsize=(20, 10))
-ax = fig.add_subplot(111, projection='3d')
-surf = ax.plot_surface(grid_d, grid_c/c0 * alpha0, DAFBM, cmap='viridis', alpha=0.7)
-ax.scatter(di0, alpha0, DAF0, color='r', marker='o')
+    fig = plt.figure(figsize=(20, 10))
+    ax = fig.add_subplot(111, projection='3d')
+    surf = ax.plot_surface(grid_d, grid_c/c0 * alpha0, DAFBM, cmap='viridis', alpha=0.7)
+    ax.scatter(di0, alpha0, DAF0, color='r', marker='o')
 
-ax.set_xlabel(r'$d_0$ [m]')
-ax.set_ylabel(r'$\alpha$')
-ax.set_zlabel(r'$DAF_{BM}$')
-ax.grid(True)
-plt.savefig('figs/multi/2Dd0alpha.png')
-plt.close()
+    ax.set_xlabel(r'$d_0$ [m]')
+    ax.set_ylabel(r'$\alpha$')
+    ax.set_zlabel(r'$DAF_{BM}$')
+    ax.grid(True)
+    plt.savefig('figs/multi/2Dd0alpha.png')
+    plt.close()
