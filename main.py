@@ -103,7 +103,7 @@ if file_path.is_file():
         plt.ylabel(r'[%]')
         plt.savefig('figs/single/sens_nele.png')
 
-cs = np.linspace(0.1, 200)
+cs = np.linspace(1e-8, 200)
 alphas = cs*np.pi/length/my_beam.return_omega_j(1)
 vs_mid, bms_mid, vs_max, bms_max = sweep_alpha(my_beam, damp_ratio, nx, nt, P, cs)
 plot_sweep_alpha(vs_mid, bms_mid, vs_max, bms_max, alphas)
@@ -117,7 +117,6 @@ np.savez(file_path,
          DAFV = vs_mid,
          DAFBM = bms_mid,
          v = np.diag(v),
-         t = my_beam.t,
-         DAFcase = DAFcase)
+         t = my_beam.t)
 #vsver, bmsver = sweep_alpha_matlab(alphas, script_path, data_mat, my_beam.v0, my_beam.M0)
 #plot_sweep_alpha_ver(vs_mid, bms_mid, vsver, bmsver, alphas)
