@@ -7,7 +7,6 @@ from plot_utils import(
 from beam import Beam
 import numpy as np
 from scipy.io import savemat
-import matlab.engine
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 
@@ -20,13 +19,13 @@ perc_back = 0.7
 Pi = np.array([(1-perc_back)*Ptot, perc_back*Ptot])
 
 c = 30
-l = 25
+length = 25
 E = 3.5e10
 h = 0.75
 b = 11
 J = b*h**3/12
 mu = 20897.25
-n_modes = 600
+n_modes = 10
 nx = 400
 nt = 101
 damp_ratio = 0
@@ -35,7 +34,7 @@ generate_verify = True
 regenerate_sweep = False
 
 data_mat = {
-    'l': float(l),
+    'length': float(length),
     'c': float(c),
     'P1': float(Pi[0]),
     'P2': float(Pi[1]),
@@ -49,18 +48,17 @@ data_mat = {
 }
 savemat('data_multi.mat', data_mat)
 
-my_beam = Beam(l, mu, E, J, damp_ratio, n_modes, nx, nt, Pi[0], c)
+my_beam = Beam(length, mu, E, J, damp_ratio, n_modes, nx, nt, Pi, c)
 print(my_beam.alpha)
 dx = my_beam.x[1] - my_beam.x[0]
 
-omega = np.pi*c/l
-v0i = Pi*l**3/(np.pi**4*E*J)
-M0i = Pi*l/4
+omega = np.pi*c/length
 alpha = omega/my_beam.return_omega_j(1)
 
 # idxs[0][0] -> P1 entering
-t_tot, idxs = build_time_array(my_beam, Pi, di, ni, dij, nt, c)
-v, bm, tis, vis, bmis, idx_forced = get_multi_v_bm(my_beam, t_tot, idxs, Pi)
+my_beam.set_loading_config(di, ni, dij)
+my_beam.compute_time_array()
+v, bm, tis, vis, bmis, idx_forced = my_beam.compute_multi_response()
 
 # tis[i][j]
 # i = 0 -> forces with magnitude P1
@@ -68,23 +66,18 @@ v, bm, tis, vis, bmis, idx_forced = get_multi_v_bm(my_beam, t_tot, idxs, Pi)
 # j = 0 -> 1st force
 # j = 1 -> 2nd force
 
+t_tot = my_beam.t_tot
+idxs = my_beam.idxs
+
 plot_multi_disp_mid(t_tot, v, tis, vis, idx_forced, colors)
 plot_multi_bm_mid(t_tot, bm, tis, bmis, idx_forced, colors)
 plot_heatmap_disp(my_beam.x, t_tot, c, v, idxs, colors, dx)
 plot_heatmap_bm(my_beam.x, t_tot, c, bm, idxs, colors, dx)
 
-if generate_verify:
-    script_path = r'C:\Users\mattiaan\Documents\MATLAB\VBI-2D'
-    eng = matlab.engine.start_matlab()
-    eng.cd(script_path, nargout=0)
-    eng.addpath(eng.genpath(script_path))
-    eng.main_multi(nargout=0)
-    eng.quit()
-
-v0ii = ni * v0i
+v0ii = ni * my_beam.v0
 v0ii = np.sum(v0ii)
 
-M0ii = ni * M0i
+M0ii = ni * my_beam.M0
 M0ii = np.sum(M0ii)
 
 DAF0 = np.max(bm[bm.shape[0]//2, :])/M0ii
@@ -104,7 +97,7 @@ if regenerate_sweep:
         di[0] = dii
         DAFBM_c = []
         for c in c0s:
-            my_beam = Beam(l, mu, E, J, damp_ratio, n_modes, nx, nt, Pi[0], c)
+            my_beam = Beam(length, mu, E, J, damp_ratio, n_modes, nx, nt, Pi[0], c)
             t_tot, idxs = build_time_array(my_beam, Pi, di, ni, dij, nt, c)
             v, bm, tis, vis, bmis, idx_forced = get_multi_v_bm(my_beam, t_tot, idxs, Pi)
             DAFBM_c.append(np.max(bm[bm.shape[0]//2, :]))
