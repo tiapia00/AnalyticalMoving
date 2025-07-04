@@ -7,7 +7,7 @@ from beam import Beam
 
 def plot_disp_mid(my_beam: Beam, v):
     plt.figure()
-    plt.plot(my_beam.x, v[v.shape[0]//2, :])
+    plt.plot(my_beam.t, v[v.shape[0]//2, :])
     plt.xlabel(r'$t$')
     plt.ylabel(r'$v_{mid}$')
     plt.savefig('figs/single/Displacement_mid.png')

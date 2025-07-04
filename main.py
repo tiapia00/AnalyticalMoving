@@ -19,15 +19,17 @@ import os
 
 # Input data
 length = 25
-c = 40
+c = 20
 T = length/c
-P = 3e5
-E = 3.5e10
-J = 3.8349*0.7
+P = 3e4*9.81
+E = 3.1e11
+a = 11
+b = 3
+J = b**3*a/12
 mu = 18358
-n_modes = 600
+n_modes = 300
 damp_ratio = 0
-t_free = 0.5
+t_free = 0
 
 generate_verify = False
 data_mat = {
@@ -40,7 +42,7 @@ data_mat = {
     'damp_ratio': float(damp_ratio),
 }
 
-nx = 101
+nx = 501
 nt = 101
 
 my_beam = Beam(length, mu, E, J, damp_ratio, n_modes, nx, nt, P, c)
@@ -103,7 +105,7 @@ if file_path.is_file():
         plt.ylabel(r'[%]')
         plt.savefig('figs/single/sens_nele.png')
 
-cs = np.linspace(1e-8, 200)
+cs = np.linspace(1e-8, 100)
 alphas = cs*np.pi/length/my_beam.return_omega_j(1)
 vs_mid, bms_mid, vs_max, bms_max = sweep_alpha(my_beam, damp_ratio, nx, nt, P, cs)
 plot_sweep_alpha(vs_mid, bms_mid, vs_max, bms_max, alphas)
@@ -113,10 +115,12 @@ parent_dir = os.path.dirname(script_dir)
 
 file_path = os.path.join(parent_dir, "MLoadAnalytical", "data_pload.npz")
 np.savez(file_path,
-         alphas = alphas,
+         cs = cs,
          DAFV = vs_mid,
          DAFBM = bms_mid,
          v = np.diag(v),
+         v_mid = v_mid,
+         bm_mid = bm_mid,
          t = my_beam.t)
 #vsver, bmsver = sweep_alpha_matlab(alphas, script_path, data_mat, my_beam.v0, my_beam.M0)
 #plot_sweep_alpha_ver(vs_mid, bms_mid, vsver, bmsver, alphas)
