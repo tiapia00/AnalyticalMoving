@@ -1,3 +1,8 @@
+"""
+- correct shift? plot single contributions
+"""
+
+from load_els import LoadElement, LoadSystem
 from utils import build_time_array, get_multi_v_bm, verify_results
 from plot_utils import(
     plot_multi_disp_mid,
@@ -10,79 +15,58 @@ from scipy.io import savemat
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 
-ni = np.array([2, 2])
-di = np.array([4, 1.5])
-dij = np.array([1])
+m_axles = np.array([3e2, 3e3])
+m_carriage = 3e3
+di = np.array([1])
+dij = np.array([2])
 
-Ptot = 2.8e4 * 9.81
-perc_back = 0.7
-Pi = np.array([(1-perc_back)*Ptot, perc_back*Ptot])
+vehs = []
+vehs.append(LoadElement(m_axles, m_carriage, di))
+vehs.append(LoadElement(m_axles, m_carriage, di))
 
-c = 30
+load_configuration = LoadSystem(vehs, dij)
+
+c = 10
 length = 25
 E = 3.5e10
-h = 0.75
+h = 3
 b = 11
 J = b*h**3/12
-mu = 20897.25
+mu = 1000
 n_modes = 10
 nx = 400
-nt = 101
+nt = 400
 damp_ratio = 0
 colors = ['red', 'blue']
 generate_verify = True
 regenerate_sweep = False
+g = 9.81
 
-data_mat = {
-    'length': float(length),
-    'c': float(c),
-    'P1': float(Pi[0]),
-    'P2': float(Pi[1]),
-    'd1': float(di[0]),
-    'd2': float(di[1]),
-    'd12': float(dij[0]),
-    'E': float(E),
-    'J': float(J),
-    'mu': float(mu),
-    'damp_ratio': float(damp_ratio)
-}
-savemat('data_multi.mat', data_mat)
-
-my_beam = Beam(length, mu, E, J, damp_ratio, n_modes, nx, nt, Pi, c)
+my_beam = Beam(length, mu, E, J, damp_ratio, n_modes, nx, nt, c)
 print(my_beam.alpha)
 dx = my_beam.x[1] - my_beam.x[0]
 
 omega = np.pi*c/length
 alpha = omega/my_beam.return_omega_j(1)
 
-# idxs[0][0] -> P1 entering
-my_beam.set_loading_config(di, ni, dij)
-my_beam.compute_time_array()
-v, bm, tis, vis, bmis, idx_forced = my_beam.compute_multi_response()
+t_global, v, bm = my_beam.compute_multi_response(load_configuration)
 
-# tis[i][j]
-# i = 0 -> forces with magnitude P1
-# i = 1 -> force with magnitude P2
-# j = 0 -> 1st force
-# j = 1 -> 2nd force
+plt.figure()
+plt.plot(t_global, v[v.shape[0]//2])
+plt.xlabel(r'$t$')
+plt.ylabel(r'$U_2$')
+plt.title('Midspan displacement')
+plt.show()
 
-t_tot = my_beam.t_tot
-idxs = my_beam.idxs
+# Comparison with total weight applied at midspan
+total_mass = load_configuration.total_mass()
 
-plot_multi_disp_mid(t_tot, v, tis, vis, idx_forced, colors)
-plot_multi_bm_mid(t_tot, bm, tis, bmis, idx_forced, colors)
-plot_heatmap_disp(my_beam.x, t_tot, c, v, idxs, colors, dx)
-plot_heatmap_bm(my_beam.x, t_tot, c, bm, idxs, colors, dx)
+v0_total = my_beam.get_v0(total_mass*g)
+M0_total = my_beam.get_M0(total_mass*g)
 
-v0ii = ni * my_beam.v0
-v0ii = np.sum(v0ii)
+DAF0 = np.max(bm[bm.shape[0]//2, :])/M0_total
 
-M0ii = ni * my_beam.M0
-M0ii = np.sum(M0ii)
-
-DAF0 = np.max(bm[bm.shape[0]//2, :])/M0ii
-
-verify_results(v[v.shape[0]//2, :], bm[bm.shape[0]//2, :], v0ii, M0ii, t_tot)
+verify_results(v[v.shape[0]//2, :], bm[bm.shape[0]//2, :], v0_total, M0_total, t_global)
 
 alpha0 = my_beam.alpha
 c0 = c
