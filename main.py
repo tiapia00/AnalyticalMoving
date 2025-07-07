@@ -15,7 +15,7 @@ from scipy.io import savemat
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 
-m_axles = np.array([3e2, 3e3])
+m_axles = np.array([3e3, 3e3])
 m_carriage = 3e3
 di = np.array([1])
 dij = np.array([2])
@@ -26,16 +26,16 @@ vehs.append(LoadElement(m_axles, m_carriage, di))
 
 load_configuration = LoadSystem(vehs, dij)
 
-c = 10
+c = 20
 length = 25
 E = 3.5e10
 h = 3
 b = 11
 J = b*h**3/12
 mu = 1000
-n_modes = 10
-nx = 400
-nt = 400
+n_modes = 20
+nx = 1000
+nt = 500
 damp_ratio = 0
 colors = ['red', 'blue']
 generate_verify = True

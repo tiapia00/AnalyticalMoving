@@ -9,12 +9,11 @@ class LoadElement:
         if len(di) != len(m_axles) - 1:
             raise ValueError("Axle spacing vector not consistent with number of axles")
 
-        self.m_axles = m_axles
         self.n_axles = len(m_axles)
         self.m_carriage = m_carriage
         self.di = np.concatenate(([0], di))
         self.location = np.empty(len(m_axles))
-        self.mass_per_axle = np.ones(self.n_axles) * self.m_carriage/self.n_axles + self.m_axles
+        self.m_per_axle = np.ones(self.n_axles) * self.m_carriage/self.n_axles + m_axles
 
 class LoadSystem:
     def __init__(self, elements: list, dij: np.ndarray):
@@ -25,17 +24,19 @@ class LoadSystem:
 
         self.elements = elements
         self.interspacing = dij
+        self.get_initial_location()
 
     def total_mass(self):
         """Returns the total mass of all load elements (axles + carriage)."""
         total = 0
         for elem in self.elements:
-            total += np.sum(elem.m_axles) + elem.m_carriage
+            total += np.sum(elem.m_per_axle)
         return total
 
     def get_initial_location(self):
         location = 0
         for i, elem in enumerate(self.elements):
             elem.location = location - elem.di
-            location += - elem.location[-1] - self.interspacing[i]
-
+            location += elem.location[-1]
+            if i < len(self.interspacing):
+                location -= self.interspacing[i]

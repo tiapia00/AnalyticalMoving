@@ -1,6 +1,8 @@
 import numpy as np
 from scipy.interpolate import interp1d
+from scipy.integrate import simpson
 from typing import Optional, Tuple, List
+import matplotlib.pyplot as plt
 
 from load_els import LoadElement, LoadSystem
 
@@ -141,7 +143,7 @@ class Beam:
 
     def build_global_time(self, loadsystem : LoadSystem) -> np.ndarray:
         last_location = loadsystem.elements[-1].location[-1]
-        global_t = np.linspace(0, (self.length + last_location)/self.c, self.nt)
+        global_t = np.linspace(0, (self.length + np.abs(last_location))/self.c, self.nt)
 
         return global_t
 
@@ -152,7 +154,7 @@ class Beam:
         total_bm = np.zeros_like(total_disp)
 
         for el in loadsystem.elements:
-            for i, m_axle in enumerate(el.m_axles):
+            for i, m_axle in enumerate(el.m_per_axle):
                 t_enter = np.abs(el.location[i])/self.c
 
                 v0 = self.get_v0(m_axle * self.g)
@@ -161,15 +163,15 @@ class Beam:
                 vi_forced = self.get_v(self.alpha, v0)
                 bm_forced = self.get_bm(self.alpha, M0)
                 vdot_last = self.get_v_dot(self.alpha, v0, self.t[-1])
-                t_free = np.linspace(0, t_global[-1] - t_enter, self.nt)
-                vi_free, bm_free = self.get_v_free(vi_forced[:,-1], vdot_last, t_free)
+                t_free = np.linspace(0, t_global[-1] - self.t[-1] - t_enter, self.nt)
+                vi_free, bm_free = self.compute_free_response(vi_forced[:,-1], vdot_last, t_free)
 
                 ti = np.concatenate((self.t, self.t[-1] + t_free))
                 vi = np.concatenate((vi_forced, vi_free), axis=1)
                 bmi = np.concatenate((bm_forced, bm_free), axis=1)
 
-                vi_interp = interp1d(ti, vi, bounds_error=False, fill_value=0.0)
-                bmi_interp = interp1d(ti, bmi, bounds_error=False, fill_value=0.0)
+                vi_interp = interp1d(ti, vi, axis=1, bounds_error=False, fill_value=0.0)
+                bmi_interp = interp1d(ti, bmi, axis=1, bounds_error=False, fill_value=0.0)
 
                 vi_in_global = vi_interp(t_global - t_enter)
                 bmi_in_global = bmi_interp(t_global - t_enter)
@@ -189,11 +191,16 @@ class Beam:
         return phi
 
 
-    def get_v_free(self, v0: np.ndarray, v0_dot: np.ndarray, t_free):
+    def compute_free_response(self, v0: np.ndarray, v0_dot: np.ndarray, t_free):
         phi = self.get_modes_shapes()
 
-        a = np.trapezoid(v0.reshape(-1,1) * phi, self.x, axis=0)
-        b = np.trapezoid(v0_dot.reshape(-1,1) * phi, self.x, axis=0)
+        plt.figure()
+        plt.plot(self.x, v0)
+        plt.plot(self.x, v0_dot)
+        plt.show()
+
+        a = simpson(v0.reshape(-1,1) * phi, self.x, axis=0)
+        b = simpson(v0_dot.reshape(-1,1) * phi, self.x, axis=0)
 
         a *= 2 / self.length
         b *= 2 / self.length
@@ -206,15 +213,22 @@ class Beam:
         v = np.zeros((len(self.x), len(t_free)))
         bm = np.zeros((len(self.x), len(t_free)))
 
+        alpha = 36
+        p = 4
+
         for j in range(0, a.shape[0]):
             omega_j = self.return_omega_j(j + 1)
             vj = a[j] * np.cos(omega_j * gridt) + b[j] * np.sin(omega_j * gridt)
             vj *= np.sin((j + 1) * np.pi * gridx / self.length)
             v += vj
 
-            bmj = a[j] * np.sin(omega_j * gridt) - b[j] * np.cos(omega_j * gridt)
+            bmj = a[j] * np.cos(omega_j * gridt) + b[j] * np.sin(omega_j * gridt)
             bmj *= np.sin((j + 1) * np.pi * gridx / self.length)
             bmj *= (j+1)**2 * np.pi**2 / self.length**2
+            # Filter due to modal truncation, v0_dot -> b[j] != 0
+            # amplification for the high modes
+            sigma_j = np.exp(-alpha * ((j+1)/a.shape[0])**p)
+            bmj *= sigma_j
             bmj *= self.E*self.J
             bm += bmj
 
