@@ -1,7 +1,3 @@
-"""
-- correct shift? plot single contributions
-"""
-
 from load_els import LoadElement, LoadSystem
 from utils import build_time_array, get_multi_v_bm, verify_results
 from plot_utils import(
